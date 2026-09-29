@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Privacy",
-  description: "How ClassActionForMe handles your photos, bank data, and email — in plain English.",
+  description: "How It Got Sued handles your photos, bank data, and email — in plain English.",
 };
 
 const SECTIONS: { title: string; points: React.ReactNode[] }[] = [

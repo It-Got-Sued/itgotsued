@@ -64,9 +64,8 @@ export default async function CasesPage({ searchParams }: { searchParams: Promis
   return (
     <div className="space-y-8">
       <Reveal className="space-y-4">
-        <p className="text-sm font-semibold uppercase tracking-wider text-primary">The docket, searchable</p>
-        <h1 className="text-4xl font-extrabold sm:text-5xl">
-          <span className="text-gradient">{heading}</span>
+                <h1 className="text-4xl font-extrabold sm:text-5xl">
+          {heading}
         </h1>
         <nav aria-label="Filter by status">
           <ul className="flex flex-wrap gap-2">
@@ -83,7 +82,7 @@ export default async function CasesPage({ searchParams }: { searchParams: Promis
                   <Link
                     href={href}
                     aria-current={active ? "page" : undefined}
-                    className={`chip ${active ? "border-transparent bg-brand-gradient text-white shadow-soft" : "hover:-translate-y-0.5 hover:border-primary/50 hover:text-primary"}`}
+                    className={`chip ${active ? "bg-sticker text-[#17175c]" : "hover:bg-surface-muted"}`}
                   >
                     {s.label}
                   </Link>
@@ -99,7 +98,7 @@ export default async function CasesPage({ searchParams }: { searchParams: Promis
           We couldn&apos;t load lawsuits right now. Please try again shortly.
         </div>
       ) : result.cases.length === 0 ? (
-        <div className="card-glass p-10 text-center">
+        <div className="card p-10 text-center">
           <p className="font-semibold">No lawsuits match these filters.</p>
           <p className="mt-1 text-sm text-muted">Try removing a filter or searching a broader term.</p>
         </div>

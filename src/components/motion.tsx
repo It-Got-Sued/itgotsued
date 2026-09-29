@@ -5,10 +5,13 @@ import { useEffect, useRef, useState } from "react";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
-/** Fades and lifts its children into view when scrolled to. */
+/**
+ * Layout wrapper kept for existing call sites. Scroll-triggered entrances were
+ * removed in the It Got Sued redesign: the stamp in the hero is the page's one
+ * motion moment, so content just sits on the page.
+ */
 export function Reveal({
   children,
-  delay = 0,
   className,
   as = "div",
 }: {
@@ -17,22 +20,10 @@ export function Reveal({
   className?: string;
   as?: "div" | "section" | "li";
 }) {
-  const reduce = useReducedMotion();
-  const Comp = motion[as];
-  return (
-    <Comp
-      className={className}
-      initial={reduce ? false : { opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.6, ease: EASE, delay }}
-    >
-      {children}
-    </Comp>
-  );
+  const Comp = as;
+  return <Comp className={className}>{children}</Comp>;
 }
 
-/** A list whose items animate in one after another. */
 export function StaggerList({
   children,
   className,
@@ -40,32 +31,11 @@ export function StaggerList({
   children: React.ReactNode;
   className?: string;
 }) {
-  const reduce = useReducedMotion();
-  return (
-    <motion.ul
-      className={className}
-      initial={reduce ? false : "hidden"}
-      whileInView="show"
-      viewport={{ once: true, margin: "-40px" }}
-      variants={{ hidden: {}, show: { transition: { staggerChildren: 0.07 } } }}
-    >
-      {children}
-    </motion.ul>
-  );
+  return <ul className={className}>{children}</ul>;
 }
 
 export function StaggerItem({ children, className }: { children: React.ReactNode; className?: string }) {
-  return (
-    <motion.li
-      className={className}
-      variants={{
-        hidden: { opacity: 0, y: 18, scale: 0.98 },
-        show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.5, ease: EASE } },
-      }}
-    >
-      {children}
-    </motion.li>
-  );
+  return <li className={className}>{children}</li>;
 }
 
 /** Counts up from 0 to `value` the first time it scrolls into view. */

@@ -14,15 +14,12 @@ export function ApplyPanel({ c }: { c: CaseDetail }) {
   return (
     <section
       aria-labelledby="settlement-heading"
-      className={`relative space-y-4 overflow-hidden rounded-3xl p-6 ${
+      className={`relative space-y-4 overflow-hidden rounded-2xl p-6 ${
         canApply
-          ? "border border-emerald-400/50 bg-gradient-to-br from-emerald-400/15 via-teal-400/10 to-cyan-400/15 shadow-[0_20px_60px_-20px_rgba(16,185,129,0.55)]"
+          ? "border-2 border-border bg-success-bg shadow-hard"
           : "card"
       }`}
     >
-      {canApply && (
-        <div aria-hidden className="absolute -right-10 -top-10 h-40 w-40 animate-aurora rounded-full bg-emerald-400/30 blur-2xl" />
-      )}
       <h2 id="settlement-heading" className="relative text-xl font-bold">
         {canApply ? "Claims are open" : "Settlement"}
       </h2>
@@ -50,7 +47,7 @@ export function ApplyPanel({ c }: { c: CaseDetail }) {
             href={claimUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 px-6 text-base text-white shadow-lift hover:-translate-y-0.5 hover:brightness-110"
+            className="btn w-full border-[#17175c] bg-mint px-6 text-base text-[#062b1a] shadow-soft hover:brightness-105"
           >
             Apply on the official settlement site
             <span aria-hidden>↗</span>

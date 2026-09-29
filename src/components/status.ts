@@ -69,13 +69,13 @@ export const TONE_DOT: Record<StatusInfo["tone"], string> = {
   danger: "bg-danger-solid",
 };
 
-/** Gradient accent for the top edge of case cards. */
+/** Solid band across the top edge of case cards. */
 export const TONE_ACCENT: Record<StatusInfo["tone"], string> = {
-  success: "from-emerald-400 via-teal-400 to-cyan-400",
-  info: "from-indigo-500 via-violet-500 to-fuchsia-500",
-  warn: "from-amber-400 via-orange-400 to-rose-400",
-  neutral: "from-slate-300 via-slate-400 to-slate-300",
-  danger: "from-rose-500 via-pink-500 to-fuchsia-500",
+  success: "bg-success-solid",
+  info: "bg-info-solid",
+  warn: "bg-warn-solid",
+  neutral: "bg-neutral-solid",
+  danger: "bg-danger-solid",
 };
 
 export function isCaseStatus(v: unknown): v is CaseStatus {

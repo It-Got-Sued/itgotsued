@@ -8,11 +8,11 @@ import { SOURCE_LABEL } from "./detections";
 import { IconX } from "../icons";
 
 const SOURCE_TINT: Record<DetectionSource, string> = {
-  text: "from-violet-500/15 to-fuchsia-500/15 border-violet-500/30",
-  photo: "from-pink-500/15 to-orange-400/15 border-pink-500/30",
-  bank: "from-cyan-500/15 to-indigo-500/15 border-cyan-500/30",
-  receipt: "from-amber-400/15 to-orange-500/15 border-amber-500/30",
-  manual: "from-emerald-400/15 to-teal-500/15 border-emerald-500/30",
+  text: "bg-surface border-border",
+  photo: "bg-surface border-border",
+  bank: "bg-surface border-border",
+  receipt: "bg-surface border-border",
+  manual: "bg-surface border-border",
 };
 
 export function DetectionChips({
@@ -50,8 +50,8 @@ export function DetectionChips({
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.6 }}
                   transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                  className={`inline-flex items-center gap-1 rounded-full border bg-gradient-to-r py-1 pl-3.5 pr-1 text-sm ${
-                    unsure ? "border-dashed border-warn-solid/60 from-amber-300/20 to-amber-300/10" : SOURCE_TINT[g.sources[0]]
+                  className={`inline-flex items-center gap-1 rounded-full border-2 py-1 pl-3.5 pr-1 text-sm ${
+                    unsure ? "border-dashed border-border bg-warn-bg" : SOURCE_TINT[g.sources[0]]
                   }`}
                 >
                   <span>

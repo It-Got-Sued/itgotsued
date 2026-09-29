@@ -23,10 +23,10 @@ type MatchState =
 
 type Tab = "text" | "photo" | "bank";
 
-const TABS: { id: Tab; label: string; icon: React.ReactNode; tint: string }[] = [
-  { id: "text", label: "Describe", icon: <IconPencil size={18} />, tint: "from-violet-500 to-fuchsia-500" },
-  { id: "photo", label: "Photo", icon: <IconCamera size={18} />, tint: "from-pink-500 to-orange-400" },
-  { id: "bank", label: "Bank", icon: <IconBank size={18} />, tint: "from-cyan-500 to-indigo-500" },
+const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
+  { id: "text", label: "Describe", icon: <IconPencil size={18} /> },
+  { id: "photo", label: "Photo", icon: <IconCamera size={18} /> },
+  { id: "bank", label: "Bank", icon: <IconBank size={18} /> },
 ];
 
 /** The "What do you own?" panel: collect → confirm chips → match. */
@@ -88,15 +88,12 @@ export function Scanner({ headingLevel = 2 }: { headingLevel?: 1 | 2 }) {
   const unmatched = groups.filter((g) => !matchedKeys.has(g.key));
 
   return (
-    <section aria-labelledby="own-heading" className="card-glass relative overflow-hidden p-5 sm:p-8">
-      <div aria-hidden className="absolute inset-x-0 top-0 h-1 animate-gradient-pan bg-brand-gradient [background-size:200%_auto]" />
+    <section aria-labelledby="own-heading" className="card relative overflow-hidden p-5 shadow-hard sm:p-8">
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-            <IconSparkle size={14} /> Step 1 · Tell us what you own
-          </p>
-          <H id="own-heading" className="text-2xl font-bold sm:text-3xl">
+          <p className="mb-2 text-sm font-bold text-primary">Step 1 of 3</p>
+          <H id="own-heading" className="text-3xl sm:text-4xl">
             What do you own?
           </H>
           <p className="mt-1 max-w-xl text-muted">
@@ -111,7 +108,7 @@ export function Scanner({ headingLevel = 2 }: { headingLevel?: 1 | 2 }) {
         role="tablist"
         aria-label="Ways to tell us what you own"
         onKeyDown={onTabKey}
-        className="mt-6 grid grid-cols-3 gap-1 rounded-2xl border border-border bg-surface-muted/70 p-1"
+        className="mt-6 grid grid-cols-3 gap-1 rounded-full border-2 border-border bg-surface-muted p-1"
       >
         {TABS.map((t) => {
           const active = t.id === tab;
@@ -125,14 +122,14 @@ export function Scanner({ headingLevel = 2 }: { headingLevel?: 1 | 2 }) {
               aria-controls={`panel-${t.id}`}
               tabIndex={active ? 0 : -1}
               onClick={() => setTab(t.id)}
-              className={`relative flex min-h-12 items-center justify-center gap-2 rounded-xl px-2 text-sm font-semibold transition-colors ${
-                active ? "text-white" : "text-muted hover:text-foreground"
+              className={`relative flex min-h-12 items-center justify-center gap-2 rounded-full px-2 text-[0.95rem] font-bold transition-colors ${
+                active ? "text-[#17175c]" : "text-muted hover:text-foreground"
               }`}
             >
               {active && (
                 <motion.span
                   layoutId="scanner-tab"
-                  className={`absolute inset-0 rounded-xl bg-gradient-to-r ${t.tint} shadow-soft`}
+                  className="absolute inset-0 rounded-full border-2 border-[#17175c] bg-sticker"
                   transition={{ type: "spring", stiffness: 380, damping: 32 }}
                 />
               )}
@@ -172,9 +169,9 @@ export function Scanner({ headingLevel = 2 }: { headingLevel?: 1 | 2 }) {
             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden"
           >
-            <div className="mt-8 space-y-4 rounded-2xl border border-primary/30 bg-gradient-to-br from-violet-500/[0.07] via-pink-500/[0.05] to-orange-400/[0.07] p-5">
+            <div className="mt-8 space-y-4 rounded-2xl border-2 border-border bg-surface-muted p-5">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-primary">Step 2</p>
+                <p className="text-sm font-bold text-primary">Step 2 of 3</p>
                 <h3 className="text-lg font-bold">Confirm your brands</h3>
                 <p className="text-sm text-muted">
                   Remove anything that&apos;s wrong, add anything we missed, then search.
@@ -216,7 +213,7 @@ export function Scanner({ headingLevel = 2 }: { headingLevel?: 1 | 2 }) {
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-primary">Step 3 · Results</p>
+            <p className="text-sm font-bold text-primary">Step 3 of 3</p>
             <h3 ref={resultsRef} tabIndex={-1} className="text-2xl font-bold">
               {withCases.length ? (
                 <>

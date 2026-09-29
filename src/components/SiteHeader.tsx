@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { IconMenu, IconScale, IconX } from "./icons";
+import { IconMenu, IconX } from "./icons";
 
 const NAV = [
   { href: "/cases", label: "All lawsuits" },
@@ -20,12 +20,14 @@ function isActive(pathname: string, href: string) {
 
 export function Logo() {
   return (
-    <Link href="/" className="group inline-flex items-center gap-2.5" aria-label="ClassActionForMe home">
-      <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand-gradient text-white shadow-soft transition-transform duration-300 group-hover:rotate-[-8deg] group-hover:scale-105">
-        <IconScale size={20} />
-      </span>
-      <span className="font-display text-lg font-bold tracking-tight">
-        ClassAction<span className="text-gradient">ForMe</span>
+    <Link
+      href="/"
+      className="group inline-flex items-baseline gap-1.5 font-display text-xl leading-none"
+      aria-label="It Got Sued home"
+    >
+      <span>it got</span>
+      <span className="stamp text-[1.05em] transition-transform duration-200 group-hover:rotate-[-10deg]">
+        sued
       </span>
     </Link>
   );
@@ -46,30 +48,31 @@ export function SiteHeader() {
   return (
     <header
       className={`sticky top-0 z-40 transition-all duration-300 ${
-        scrolled ? "glass border-b border-border shadow-soft" : "border-b border-transparent"
+        scrolled ? "border-b-2 border-border bg-background" : "border-b-2 border-transparent bg-background"
       }`}
     >
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
         <Logo />
 
         <nav aria-label="Main" className="hidden md:block">
-          <ul className="flex items-center gap-1 rounded-full border border-border bg-surface/60 p-1 text-sm">
+          <ul className="flex items-center gap-1 text-[0.95rem]">
             {NAV.map((n) => {
               const active = isActive(pathname, n.href);
               return (
                 <li key={n.href} className="relative">
                   {active && (
                     <motion.span
-                      layoutId="nav-pill"
-                      className="absolute inset-0 rounded-full bg-brand-gradient shadow-soft"
+                      layoutId="nav-mark"
+                      aria-hidden
+                      className="absolute inset-x-2 bottom-1 h-2.5 -rotate-1 rounded-sm bg-sticker"
                       transition={{ type: "spring", stiffness: 420, damping: 34 }}
                     />
                   )}
                   <Link
                     href={n.href}
                     aria-current={active ? "page" : undefined}
-                    className={`relative z-10 block rounded-full px-4 py-2 font-medium transition-colors ${
-                      active ? "text-white" : "text-muted hover:text-foreground"
+                    className={`relative z-10 block px-3 py-2 font-semibold transition-colors ${
+                      active ? "text-foreground" : "text-muted hover:text-foreground"
                     }`}
                   >
                     {n.label}
@@ -80,13 +83,13 @@ export function SiteHeader() {
           </ul>
         </nav>
 
-        <Link href="/scan" className="btn-primary hidden md:inline-flex">
-          Scan what I own
+        <Link href="/scan" className="btn-primary hidden min-h-11 px-5 text-[0.95rem] md:inline-flex">
+          Check my stuff
         </Link>
 
         <button
           type="button"
-          className="btn-secondary px-3 md:hidden"
+          className="btn-secondary min-h-11 px-3 md:hidden"
           aria-expanded={open}
           aria-controls="mobile-nav"
           aria-label={open ? "Close menu" : "Open menu"}
@@ -101,7 +104,7 @@ export function SiteHeader() {
           <motion.nav
             id="mobile-nav"
             aria-label="Main"
-            className="glass overflow-hidden border-t border-border md:hidden"
+            className="overflow-hidden border-t-2 border-border bg-background md:hidden"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
@@ -119,9 +122,9 @@ export function SiteHeader() {
                     href={n.href}
                     aria-current={isActive(pathname, n.href) ? "page" : undefined}
                     onClick={() => setOpen(false)}
-                    className={`block rounded-xl px-4 py-3 font-medium ${
+                    className={`block rounded-xl px-4 py-3 font-semibold ${
                       isActive(pathname, n.href)
-                        ? "bg-brand-gradient text-white"
+                        ? "bg-sticker text-[#17175c]"
                         : "hover:bg-surface-muted"
                     }`}
                   >

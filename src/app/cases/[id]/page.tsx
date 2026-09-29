@@ -60,9 +60,8 @@ export default async function CasePage({ params }: Props) {
       {c.isSample && <SampleBanner />}
 
       <Reveal>
-        <header className="card-glass relative overflow-hidden p-6 sm:p-10">
+        <header className="card relative overflow-hidden p-6 shadow-hard sm:p-10">
           <div aria-hidden className={`absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r ${TONE_ACCENT[status.tone]}`} />
-          <div aria-hidden className="absolute -right-24 -top-24 h-72 w-72 animate-aurora rounded-full bg-brand-gradient opacity-20 blur-3xl" />
           <div className="relative space-y-4">
             <Link href="/cases" className="inline-flex items-center gap-1 text-sm font-medium text-muted transition-colors hover:text-primary">
               <span aria-hidden>←</span> All lawsuits
@@ -77,7 +76,7 @@ export default async function CasePage({ params }: Props) {
                 .filter(([, v]) => v)
                 .map(([k, v]) => (
                   <div key={k} className="rounded-2xl border border-border bg-surface/70 px-4 py-3">
-                    <dt className="text-xs font-medium uppercase tracking-wider text-muted">{k}</dt>
+                    <dt className="text-sm font-semibold text-muted">{k}</dt>
                     <dd className="mt-0.5 font-semibold">{v}</dd>
                   </div>
                 ))}

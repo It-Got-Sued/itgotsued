@@ -5,11 +5,10 @@ import { motion } from "motion/react";
 import type { OwnedItem } from "@/lib/types";
 
 const AVATAR_TINTS = [
-  "from-violet-500 to-fuchsia-500",
-  "from-pink-500 to-orange-400",
-  "from-cyan-500 to-indigo-500",
-  "from-emerald-400 to-teal-500",
-  "from-amber-400 to-pink-500",
+  "bg-sticker text-[#17175c]",
+  "bg-mint text-[#062b1a]",
+  "bg-info-solid text-white",
+  "bg-stamp text-white",
 ];
 
 export function ItemRow({
@@ -79,7 +78,7 @@ export function ItemRow({
       <span className="flex min-w-0 items-center gap-3">
         <span
           aria-hidden
-          className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br ${AVATAR_TINTS[hue]} font-display text-lg font-bold text-white shadow-soft`}
+          className={`grid h-10 w-10 shrink-0 place-items-center rounded-full border-2 border-[#17175c] ${AVATAR_TINTS[hue]} font-display text-lg`}
         >
           {item.label.trim().charAt(0).toUpperCase()}
         </span>

@@ -10,9 +10,9 @@ export default function MyItemsPage() {
   return (
     <div className="space-y-8">
       <header className="space-y-3">
-        <p className="text-sm font-semibold uppercase tracking-wider text-primary">Saved on this device</p>
+        <p className="text-sm font-bold text-muted">Saved on this device</p>
         <h1 className="text-4xl font-extrabold sm:text-5xl">
-          My <span className="animate-gradient-pan text-gradient">Items</span>
+          My Items
         </h1>
         <p className="max-w-2xl text-lg text-muted">
           List the products, apps, and services you use. We check them against active lawsuits —

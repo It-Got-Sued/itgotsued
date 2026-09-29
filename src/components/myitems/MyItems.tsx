@@ -82,8 +82,7 @@ export function MyItems() {
 
   return (
     <div className="space-y-8">
-      <section aria-labelledby="list-heading" className="card-glass relative space-y-4 overflow-hidden p-5 sm:p-8">
-        <div aria-hidden className="absolute inset-x-0 top-0 h-1 animate-gradient-pan bg-gradient-to-r from-emerald-400 via-cyan-500 to-violet-500 [background-size:200%_auto]" />
+      <section aria-labelledby="list-heading" className="card relative space-y-4 overflow-hidden p-5 shadow-hard sm:p-8">
         <h2 id="list-heading" className="text-2xl font-bold">
           Your items{" "}
           {items.length > 0 && (

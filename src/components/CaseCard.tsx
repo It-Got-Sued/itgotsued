@@ -7,13 +7,9 @@ import { STATUS_INFO, TONE_ACCENT } from "./status";
 import { IconArrowRight, IconClock } from "./icons";
 import { StaggerItem, StaggerList } from "./motion";
 
-// Rotating chip colors so brand tags feel lively but stay readable.
+// Brand tags share one quiet style so the status badge stays the loudest thing on a card.
 const CHIP_TONES = [
-  "bg-violet-500/12 text-violet-700 dark:text-violet-300",
-  "bg-pink-500/12 text-pink-700 dark:text-pink-300",
-  "bg-orange-500/12 text-orange-700 dark:text-orange-300",
-  "bg-cyan-500/12 text-cyan-700 dark:text-cyan-300",
-  "bg-emerald-500/12 text-emerald-700 dark:text-emerald-300",
+  "bg-surface-muted text-foreground",
 ];
 
 export function BrandTag({ name, index = 0 }: { name: string; index?: number }) {
@@ -33,10 +29,10 @@ export function CaseCard({ c, headingLevel = 3 }: { c: CaseSummary; headingLevel
   const urgent = days !== null && days >= 0 && days <= 14;
 
   return (
-    <article className="card gradient-ring group relative flex h-full flex-col overflow-hidden p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lift">
+    <article className="card gradient-ring group relative flex h-full flex-col overflow-hidden p-5 transition-all duration-300 ">
       <div
         aria-hidden
-        className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${TONE_ACCENT[tone]}`}
+        className={`absolute inset-x-0 top-0 h-2 border-b-2 border-border ${TONE_ACCENT[tone]}`}
       />
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <StatusBadge status={c.status} />
@@ -80,7 +76,7 @@ export function CaseCard({ c, headingLevel = 3 }: { c: CaseSummary; headingLevel
         )}
         <span
           aria-hidden
-          className="grid h-8 w-8 place-items-center rounded-full bg-surface-muted text-primary transition-all duration-300 group-hover:translate-x-0.5 group-hover:bg-brand-gradient group-hover:text-white"
+          className="grid h-8 w-8 place-items-center rounded-full bg-surface-muted text-primary transition-all duration-300 group-hover:translate-x-0.5 group-hover:bg-sticker group-hover:text-[#17175c]"
         >
           <IconArrowRight size={16} />
         </span>

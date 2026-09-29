@@ -81,9 +81,9 @@ export function PhotoScan({ onDetections }: { onDetections: (d: BrandDetection[]
       {!preview ? (
         <label
           htmlFor="own-photo"
-          className="group relative flex min-h-48 cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-pink-500/40 bg-gradient-to-br from-pink-500/[0.06] to-orange-400/[0.08] p-6 text-center transition-all duration-300 hover:border-pink-500/70 hover:from-pink-500/10 hover:to-orange-400/15"
+          className="group relative flex min-h-48 cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-border bg-surface-muted p-6 text-center transition-colors duration-150 hover:bg-warn-bg"
         >
-          <span className="grid h-14 w-14 animate-float place-items-center rounded-2xl bg-gradient-to-br from-pink-500 to-orange-400 text-white shadow-lift transition-transform group-hover:scale-110">
+          <span className="grid h-14 w-14 place-items-center rounded-full border-2 border-[#17175c] bg-sticker text-[#17175c] transition-transform group-hover:-rotate-6">
             <IconCamera size={26} />
           </span>
           <span className="font-semibold">Take or upload a photo</span>
@@ -99,8 +99,8 @@ export function PhotoScan({ onDetections }: { onDetections: (d: BrandDetection[]
               className="max-h-64 w-auto object-contain"
             />
             {busy && (
-              <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-pink-500/10 to-violet-500/10">
-                <div className="absolute inset-x-0 h-1 animate-scan-line bg-gradient-to-r from-transparent via-pink-400 to-transparent shadow-[0_0_24px_6px_rgba(236,72,153,0.55)]" />
+              <div aria-hidden className="absolute inset-0 bg-sticker/10">
+                <div className="absolute inset-x-0 h-1 animate-scan-line bg-stamp" />
               </div>
             )}
           </div>

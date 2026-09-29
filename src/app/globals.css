@@ -1,78 +1,93 @@
 @import "tailwindcss";
 
-/* ---------- Design tokens ---------- */
+/*
+ * It Got Sued — design tokens.
+ *
+ * The visual idea: everything you own is a product label, and a lawsuit is a
+ * red rubber stamp on it. Ink-blue lines, sticker yellow, stamp red, and a
+ * money green reserved for "claims open".
+ */
 
 :root {
-  --background: #fbfaff;
-  --surface: #ffffff;
-  --surface-muted: #f3f0fd;
-  --foreground: #150f2e;
-  --muted: #5b5677;
-  --border: #e6e1f5;
-  --primary: #7c3aed;
-  --primary-hover: #6d28d9;
+  --ink: #17175c;
+  --paper: #ffffff;
+  --fog: #eef0fa;
+  --sticker: #ffd23f;
+  --stamp: #e5322d;
+  --mint: #12b76a;
+
+  --background: var(--paper);
+  --surface: var(--paper);
+  --surface-muted: var(--fog);
+  --foreground: var(--ink);
+  --muted: #4c4f86;
+  --border: var(--ink);
+  --hairline: #cfd2ec;
+  --primary: var(--stamp);
+  --primary-hover: #c9241f;
   --primary-fg: #ffffff;
-  --focus: #8b5cf6;
+  --focus: #2f5bff;
 
-  /* Brand gradient stops */
-  --g1: #7c3aed; /* violet */
-  --g2: #db2777; /* fuchsia */
-  --g3: #f97316; /* orange */
-  --g4: #06b6d4; /* cyan */
+  /* Legacy accent slots, remapped onto the new palette. */
+  --g1: var(--stamp);
+  --g2: var(--sticker);
+  --g3: var(--mint);
+  --g4: #2f5bff;
 
-  --success-bg: #d1fae5;
-  --success-fg: #065f46;
-  --success-solid: #10b981;
-  --warn-bg: #fef3c7;
-  --warn-fg: #78350f;
-  --warn-solid: #f59e0b;
-  --danger-bg: #ffe4e6;
-  --danger-fg: #881337;
-  --danger-solid: #f43f5e;
-  --info-bg: #e0e7ff;
-  --info-fg: #3730a3;
-  --info-solid: #6366f1;
-  --neutral-bg: #eceaf3;
-  --neutral-fg: #3f3b55;
-  --neutral-solid: #94a3b8;
+  --success-bg: #d5f6e5;
+  --success-fg: #075c37;
+  --success-solid: var(--mint);
+  --warn-bg: #fff1bf;
+  --warn-fg: #6b4a00;
+  --warn-solid: #f5b400;
+  --danger-bg: #ffe0de;
+  --danger-fg: #9c1612;
+  --danger-solid: var(--stamp);
+  --info-bg: #e3e8ff;
+  --info-fg: #1f2f99;
+  --info-solid: #2f5bff;
+  --neutral-bg: var(--fog);
+  --neutral-fg: #3c3f70;
+  --neutral-solid: #9296c4;
 
-  --glass: rgb(255 255 255 / 0.72);
-  --shadow-color: 263deg 60% 40%;
-  --aurora-opacity: 0.55;
+  --glass: var(--paper);
+  --hard-shadow: var(--ink);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0719;
-    --surface: #141030;
-    --surface-muted: #1d1842;
-    --foreground: #f4f1ff;
-    --muted: #aaa4cc;
-    --border: #2b2556;
-    --primary: #a78bfa;
-    --primary-hover: #c4b5fd;
-    --primary-fg: #140a33;
-    --focus: #c4b5fd;
+    --ink: #eceeff;
+    --paper: #10114a;
+    --fog: #1b1d63;
+    --stamp: #ff5a4e;
+    --mint: #34d58b;
 
-    --g1: #8b5cf6;
-    --g2: #ec4899;
-    --g3: #fb923c;
-    --g4: #22d3ee;
+    --background: #0b0c38;
+    --surface: #14155a;
+    --surface-muted: #1d1f6b;
+    --foreground: #f4f5ff;
+    --muted: #b3b6e8;
+    --border: #8a8ed6;
+    --hairline: #2d3082;
+    --primary: var(--stamp);
+    --primary-hover: #ff766c;
+    --primary-fg: #1a0503;
+    --focus: #8fa6ff;
 
-    --success-bg: #0b3a2e;
-    --success-fg: #6ee7b7;
-    --warn-bg: #3d2a06;
-    --warn-fg: #fcd34d;
-    --danger-bg: #41101f;
-    --danger-fg: #fda4af;
-    --info-bg: #1e1b4b;
-    --info-fg: #a5b4fc;
-    --neutral-bg: #25213f;
-    --neutral-fg: #cfcae6;
+    --g4: #8fa6ff;
 
-    --glass: rgb(20 16 48 / 0.7);
-    --shadow-color: 263deg 80% 3%;
-    --aurora-opacity: 0.35;
+    --success-bg: #0d3d2a;
+    --success-fg: #7ff0b8;
+    --warn-bg: #3d3100;
+    --warn-fg: #ffe07a;
+    --danger-bg: #4a1411;
+    --danger-fg: #ffb0a9;
+    --info-bg: #1f2a78;
+    --info-fg: #c3cdff;
+    --neutral-bg: #1d1f6b;
+    --neutral-fg: #cfd2f5;
+
+    --hard-shadow: #04041f;
   }
 }
 
@@ -83,10 +98,17 @@
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-border: var(--border);
+  --color-hairline: var(--hairline);
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
   --color-primary-fg: var(--primary-fg);
   --color-focus: var(--focus);
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-fog: var(--fog);
+  --color-sticker: var(--sticker);
+  --color-stamp: var(--stamp);
+  --color-mint: var(--mint);
   --color-g1: var(--g1);
   --color-g2: var(--g2);
   --color-g3: var(--g3);
@@ -109,15 +131,16 @@
   --color-glass: var(--glass);
   --font-sans: var(--font-body);
   --font-display: var(--font-display);
-  --font-mono: var(--font-geist-mono);
+  --font-mono: var(--font-body);
 
-  --animate-aurora: aurora 22s ease-in-out infinite alternate;
-  --animate-gradient-pan: gradient-pan 8s ease infinite;
-  --animate-float: float 6s ease-in-out infinite;
   --animate-shimmer: shimmer 1.6s linear infinite;
-  --animate-fade-up: fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-fade-up: fade-up 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-scan-line: scan-line 1.8s ease-in-out infinite;
   --animate-ping-slow: ping-slow 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  /* Retired effects from the old theme; kept as no-ops so old class names stay harmless. */
+  --animate-aurora: none;
+  --animate-gradient-pan: none;
+  --animate-float: none;
 }
 
 /* ---------- Base ---------- */
@@ -132,150 +155,125 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.55;
 }
 
 h1,
 h2,
 h3 {
   font-family: var(--font-display), var(--font-body), system-ui, sans-serif;
-  letter-spacing: -0.02em;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.08;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
 }
 
 ::selection {
-  background: color-mix(in oklab, var(--g2) 30%, transparent);
+  background: var(--sticker);
+  color: #17175c;
 }
 
 :focus-visible {
   outline: 3px solid var(--focus);
-  outline-offset: 2px;
+  outline-offset: 3px;
   border-radius: 6px;
 }
 
 /* ---------- Utilities ---------- */
 
+/* Old gradient-text utility: now a flat stamp-red accent. */
 @utility text-gradient {
-  background-image: linear-gradient(100deg, var(--g1), var(--g2) 45%, var(--g3));
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--stamp);
 }
 
 @utility bg-brand-gradient {
-  background-image: linear-gradient(120deg, var(--g1), var(--g2) 50%, var(--g3));
+  background-color: var(--stamp);
+  color: #ffffff;
 }
 
+/* Hard ink offset, like a sticker sitting on a page. */
+@utility shadow-hard {
+  box-shadow: 4px 4px 0 var(--hard-shadow);
+}
 @utility shadow-soft {
-  box-shadow:
-    0 1px 2px hsl(var(--shadow-color) / 0.06),
-    0 4px 12px -2px hsl(var(--shadow-color) / 0.08),
-    0 16px 32px -8px hsl(var(--shadow-color) / 0.1);
+  box-shadow: 3px 3px 0 var(--hard-shadow);
 }
-
 @utility shadow-lift {
-  box-shadow:
-    0 2px 4px hsl(var(--shadow-color) / 0.08),
-    0 12px 24px -4px hsl(var(--shadow-color) / 0.14),
-    0 32px 56px -12px hsl(var(--shadow-color) / 0.2);
+  box-shadow: 6px 6px 0 var(--hard-shadow);
 }
 
 @utility glass {
-  background: var(--glass);
-  backdrop-filter: blur(16px) saturate(160%);
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  background: var(--surface);
 }
 
 @utility btn {
-  @apply relative inline-flex min-h-11 items-center justify-center gap-2 overflow-hidden rounded-xl px-5 py-2 text-sm font-semibold transition-all duration-200 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-55 disabled:active:scale-100;
+  @apply relative inline-flex min-h-12 items-center justify-center gap-2 rounded-full border-2 border-border px-6 py-2 text-base font-bold transition-[transform,box-shadow,background-color] duration-150 disabled:cursor-not-allowed disabled:opacity-55;
+  &:active:not(:disabled) {
+    transform: translate(3px, 3px);
+    box-shadow: 0 0 0 var(--hard-shadow);
+  }
 }
 @utility btn-primary {
-  @apply btn bg-brand-gradient text-white shadow-soft hover:-translate-y-0.5 hover:shadow-lift disabled:hover:translate-y-0;
-  background-size: 180% auto;
-  background-position: 0% center;
+  @apply btn bg-stamp text-white shadow-soft hover:bg-primary-hover;
+  border-color: var(--hard-shadow);
   &:hover:not(:disabled) {
-    background-position: 100% center;
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 var(--hard-shadow);
   }
 }
 @utility btn-secondary {
-  @apply btn glass border border-border text-foreground hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-soft disabled:hover:translate-y-0;
+  @apply btn bg-surface text-foreground hover:bg-sticker hover:text-[#17175c];
 }
 @utility input {
-  @apply block w-full min-h-11 rounded-xl border border-border bg-surface px-4 py-2.5 text-base text-foreground shadow-sm transition-[border-color,box-shadow] duration-200 placeholder:text-muted/80 focus:border-primary focus:outline-none;
+  @apply block w-full min-h-12 rounded-xl border-2 border-border bg-surface px-4 py-2.5 text-base text-foreground transition-[box-shadow] duration-150 placeholder:text-muted focus:outline-none;
   &:focus {
-    box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary) 22%, transparent);
+    box-shadow: 4px 4px 0 var(--sticker);
   }
 }
 @utility card {
-  @apply rounded-2xl border border-border bg-surface shadow-soft;
+  @apply rounded-2xl border-2 border-border bg-surface;
 }
 @utility card-glass {
-  @apply glass rounded-3xl border border-border shadow-soft;
+  @apply card;
 }
 @utility link {
-  @apply font-semibold text-primary underline decoration-primary/30 decoration-2 underline-offset-4 transition-colors hover:decoration-primary;
+  @apply font-bold text-foreground underline decoration-stamp decoration-[3px] underline-offset-4 transition-colors hover:bg-sticker hover:text-[#17175c];
 }
 @utility chip {
-  @apply inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3.5 py-1.5 text-sm font-medium transition-all duration-200;
+  @apply inline-flex items-center gap-1.5 rounded-full border-2 border-border bg-surface px-3.5 py-1.5 text-sm font-semibold transition-colors duration-150;
 }
 
-/* Gradient ring that appears on hover (used on case cards). */
+/* Card hover: lift off the page onto a hard shadow. */
 @utility gradient-ring {
-  position: relative;
-  &::before {
-    content: "";
-    position: absolute;
-    inset: -1px;
-    border-radius: inherit;
-    padding: 1.5px;
-    background: linear-gradient(130deg, var(--g1), var(--g2), var(--g3));
-    -webkit-mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    opacity: 0;
-    transition: opacity 0.25s ease;
-    pointer-events: none;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+  &:hover,
+  &:focus-within {
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0 var(--hard-shadow);
   }
-  &:hover::before,
-  &:focus-within::before {
-    opacity: 1;
-  }
+}
+
+/* The rubber stamp: the brand's one loud mark. */
+@utility stamp {
+  display: inline-block;
+  font-family: var(--font-display), system-ui, sans-serif;
+  color: var(--stamp);
+  border: 0.12em solid currentColor;
+  border-radius: 0.14em;
+  padding: 0.02em 0.22em 0.06em;
+  line-height: 1;
+  transform: rotate(-6deg);
+  filter: url(#stamp-ink);
 }
 
 /* ---------- Keyframes ---------- */
-
-@keyframes aurora {
-  0% {
-    transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
-  }
-  50% {
-    transform: translate3d(6%, -4%, 0) scale(1.15) rotate(12deg);
-  }
-  100% {
-    transform: translate3d(-5%, 5%, 0) scale(0.95) rotate(-8deg);
-  }
-}
-
-@keyframes gradient-pan {
-  0%,
-  100% {
-    background-position: 0% center;
-  }
-  50% {
-    background-position: 100% center;
-  }
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
 
 @keyframes shimmer {
   from {
@@ -289,7 +287,7 @@ h3 {
 @keyframes fade-up {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;

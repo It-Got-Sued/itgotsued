@@ -25,7 +25,7 @@ export function buildIcs(opts: { caseId: string; caseName: string; deadline: str
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//ClassActionForMe//Deadline//EN",
+    "PRODID:-//It Got Sued//Deadline//EN",
     "CALSCALE:GREGORIAN",
     "BEGIN:VEVENT",
     `UID:${opts.caseId.replace(/[^A-Za-z0-9-]/g, "")}-deadline@classactionforme`,

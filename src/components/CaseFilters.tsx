@@ -19,7 +19,7 @@ export function CaseFilters({
   brands: { normalized: string; name: string }[] | null;
 }) {
   return (
-    <Form action="/cases" role="search" className="card-glass grid gap-4 p-5 sm:grid-cols-2 sm:p-6 lg:grid-cols-4">
+    <Form action="/cases" role="search" className="card grid gap-4 p-5 sm:grid-cols-2 sm:p-6 lg:grid-cols-4">
       <div className="sm:col-span-2 lg:col-span-4">
         <label htmlFor="f-q" className="mb-1 block text-sm font-medium">Search</label>
         <input id="f-q" name="q" type="search" defaultValue={values.q} className="input" placeholder="Company, product, or case name" />

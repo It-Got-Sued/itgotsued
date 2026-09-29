@@ -4,13 +4,13 @@ import { Disclaimer } from "@/components/Disclaimer";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "Why ClassActionForMe exists and how it works.",
+  description: "Why It Got Sued exists and how it works.",
 };
 
 export default function AboutPage() {
   return (
     <div className="max-w-2xl space-y-6">
-      <h1 className="text-3xl font-bold tracking-tight">About ClassActionForMe</h1>
+      <h1 className="text-3xl font-bold tracking-tight">About It Got Sued</h1>
       <p>
         Most people never hear about the class actions that include them. Existing sites list a
         few hand-picked settlements and leave you to figure out which apply. We index class
