@@ -33,27 +33,34 @@ matching work themselves.
 
 1. **"What do you own?" box** — free-text description ("I use Crest toothpaste, drink
    Coke, take Nature Made vitamins") is parsed into brands and matched to lawsuits.
-2. **Photo scan** — the user photographs a room, bathroom shelf, or pantry. A vision
+2. **My Items list** — users type the things they own, one per line or one at a time
+   ("Crest toothpaste", "Peloton bike", "Nature Made vitamins"). The list is saved on
+   their device only, and is matched against the docket to show every **active**
+   lawsuit (filed, certified, settlement pending, claims open) naming those brands.
+   Items found by photo or bank scan can be added to the list with one tap. The list is
+   re-checked each visit, so new lawsuits against items the user owns show up
+   automatically.
+3. **Photo scan** — the user photographs a room, bathroom shelf, or pantry. A vision
    model detects brands (Coca-Cola can, CeraVe cream, Nature Made bottle, Crest tube)
    with a confidence score, and the user confirms detections before matching. Photos are
    processed in memory and never stored.
-3. **Bank scan (optional, Plaid)** — read-only transaction scan, merchants normalized to
+4. **Bank scan (optional, Plaid)** — read-only transaction scan, merchants normalized to
    brands, matched to lawsuits. The Plaid item is removed and all transaction data is
    discarded as soon as processing finishes. Only the list of matched brand names returns
    to the browser. Limitation: bank data shows merchants (Amazon, Walmart, Peloton,
    Verizon), not individual products — so it is strongest for services, subscriptions,
    telecoms, banks, airlines, and direct-to-consumer brands. Receipt scanning covers
    product-level purchases.
-4. **Full docket coverage** — every federal class action from CourtListener/RECAP and
+5. **Full docket coverage** — every federal class action from CourtListener/RECAP and
    PACER, not only settlements. Users learn about cases years before a settlement.
-5. **Plain-language summaries** — AI summary of each complaint: who is suing, what
+6. **Plain-language summaries** — AI summary of each complaint: who is suing, what
    product, who qualifies, what happens next, with page citations.
-6. **Brand watchlist + alerts** — follow a brand; get notified when a new lawsuit is
+7. **Brand watchlist + alerts** — follow a brand; get notified when a new lawsuit is
    filed or a claim form opens.
-7. **Deadline calendar** — add claim deadlines to your calendar (.ics) in one tap.
-8. **Parent-company mapping** — a lawsuit against The Coca-Cola Company also surfaces for
+8. **Deadline calendar** — add claim deadlines to your calendar (.ics) in one tap.
+9. **Parent-company mapping** — a lawsuit against The Coca-Cola Company also surfaces for
    Dasani, Minute Maid, and Smartwater users.
-9. **Privacy as a feature** — no account required to scan; zero retention of photos and
+10. **Privacy as a feature** — no account required to scan; zero retention of photos and
    transactions; transparent data-handling page.
 
 Later: receipt/email-receipt scanning, browser extension that flags products at
@@ -68,7 +75,8 @@ A native-feeling iOS app ships alongside the web app, sharing the same backend A
   contracts with the web app. Built and submitted with EAS Build / EAS Submit.
 - **Why Expo over SwiftUI:** one TypeScript codebase for types and API calls, fast
   iteration, and Android later at little extra cost. Native modules cover camera and Plaid.
-- **Screens:** Home (search + "What do you own?" box), Scan (camera), Bank scan,
+- **Screens:** Home (search + "What do you own?" box), My Items (typed list, matched
+  to active lawsuits), Scan (camera), Bank scan,
   Results (matched brands and lawsuits), Case detail (summary, docket, complaint PDF,
   Apply button), Watchlist, Settings/Privacy.
 - **Mobile-only advantages:**
@@ -118,7 +126,7 @@ A native-feeling iOS app ships alongside the web app, sharing the same backend A
 | POST | `/api/detect/image` | multipart `image` | `{ detections: BrandDetection[] }` |
 | POST | `/api/plaid/link-token` | — | `{ linkToken }` |
 | POST | `/api/plaid/scan` | `{ publicToken }` | `{ detections: BrandDetection[] }` |
-| POST | `/api/match` | `{ detections }` | `{ matches: BrandMatch[] }` |
+| POST | `/api/match` | `{ detections, activeOnly? }` (`MatchRequest`) | `{ matches: BrandMatch[] }` |
 | POST | `/api/watchlist` | `{ email, brand }` | `{ ok }` |
 
 ## Legal and compliance

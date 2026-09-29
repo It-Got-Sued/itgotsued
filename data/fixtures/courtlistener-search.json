@@ -1,0 +1,240 @@
+{
+  "count": 92,
+  "next": null,
+  "results": [
+    {
+      "docket_id": 74859691,
+      "caseName": "TAYLOR v. CLEARA, LLC",
+      "case_name_full": "",
+      "court": "District Court, E.D. Pennsylvania",
+      "court_id": "paed",
+      "docketNumber": "2:26-cv-07456",
+      "dateFiled": "2026-09-28",
+      "dateTerminated": null,
+      "suitNature": "890 Other Statutes: Other Statutory Actions",
+      "cause": "15:1681 Fair Credit Reporting Act",
+      "docket_absolute_url": "/docket/74859691/taylor-v-cleara-llc/",
+      "recap_documents": [
+        {
+          "absolute_url": "/docket/74859691/1/taylor-v-cleara-llc/",
+          "attachment_number": null,
+          "description": "COMPLAINT (CLASS ACTION) against CLEARA, LLC ( Filing fee $ 405 receipt number APAEDC-19686309.), filed by RYAN MICHAEL TAYLOR, JUAN GONZALEZ. (Attachments: # 1 Civil Cover Sheet, # 2 Designation Form)(FRANCIS, JAMES) (Entered: 09/28/2026)",
+          "docket_entry_id": 479629338,
+          "document_number": 1,
+          "document_type": "PACER Document",
+          "entry_date_filed": "2026-09-28",
+          "entry_number": 1,
+          "filepath_local": "recap/gov.uscourts.paed.662758/gov.uscourts.paed.662758.1.0.pdf",
+          "id": 495294496,
+          "is_available": true,
+          "pacer_doc_id": "153024229317",
+          "page_count": 16,
+          "short_description": "Complaint (Attorney)"
+        }
+      ]
+    },
+    {
+      "docket_id": 74858774,
+      "caseName": "Bradley v. The Credit Pros International, LLC",
+      "case_name_full": "",
+      "court": "District Court, S.D. Florida",
+      "court_id": "flsd",
+      "docketNumber": "9:26-cv-81320",
+      "dateFiled": "2026-09-28",
+      "dateTerminated": null,
+      "suitNature": "190 Contract: Other",
+      "cause": "28:1332 Diversity",
+      "docket_absolute_url": "/docket/74858774/bradley-v-the-credit-pros-international-llc/",
+      "recap_documents": [
+        {
+          "absolute_url": "/docket/74858774/1/bradley-v-the-credit-pros-international-llc/",
+          "attachment_number": null,
+          "description": "NOTICE OF REMOVAL (STATE COURT COMPLAINT - Class Action Complaint) Filing fee $ 405.00 receipt number AFLSDC-20043835, filed by The Credit Pros International, LLC. (Attachments: # 1 Exhibit State Court Documents, # 2 Civil Cover Sheet Civil Cover Sheet, # 3 Exhibit 2026 Annual Report CPI)(Green, Matthew) (Entered: 09/28/2026)",
+          "docket_entry_id": 479607818,
+          "document_number": 1,
+          "document_type": "PACER Document",
+          "entry_date_filed": "2026-09-28",
+          "entry_number": 1,
+          "filepath_local": null,
+          "id": 495271354,
+          "is_available": false,
+          "pacer_doc_id": "051030405176",
+          "page_count": null,
+          "short_description": "Notice of Removal (State Court Complaint)"
+        }
+      ]
+    },
+    {
+      "docket_id": 74857693,
+      "caseName": "Valdez v. Kellogg Supply, Inc.",
+      "case_name_full": "",
+      "court": "District Court, S.D. New York",
+      "court_id": "nysd",
+      "docketNumber": "1:26-cv-08438",
+      "dateFiled": "2026-09-27",
+      "dateTerminated": null,
+      "suitNature": "370 Other Fraud",
+      "cause": "28:1453 Class Action Fairness Act",
+      "docket_absolute_url": "/docket/74857693/valdez-v-kellogg-supply-inc/",
+      "recap_documents": [
+        {
+          "absolute_url": "/docket/74857693/6/valdez-v-kellogg-supply-inc/",
+          "attachment_number": null,
+          "description": "NOTICE of Appearance of Attorney Greg A. Garbacz and Douglas W. Lytle by Douglas W. Lytle on behalf of Kellogg Supply, Inc. (Lytle, Douglas) (anh). [Transferred from California Southern on 9/27/2026.] (Entered: 01/02/2026)",
+          "docket_entry_id": 479559096,
+          "document_number": 6,
+          "document_type": "PACER Document",
+          "entry_date_filed": "2026-01-02",
+          "entry_number": 6,
+          "filepath_local": null,
+          "id": 495214514,
+          "is_available": false,
+          "pacer_doc_id": "127040422833",
+          "page_count": null,
+          "short_description": ""
+        },
+        {
+          "absolute_url": "/docket/74857693/7/valdez-v-kellogg-supply-inc/",
+          "attachment_number": null,
+          "description": "ORDER Granting Extension to File Responsive Pleading [Doc. No. 4 ]. Signed by Judge Cathy Ann Bencivengo on 1/5/2026. (anh) [Transferred from California Southern on 9/27/2026.] (Entered: 01/05/2026)",
+          "docket_entry_id": 479559097,
+          "document_number": 7,
+          "document_type": "PACER Document",
+          "entry_date_filed": "2026-01-05",
+          "entry_number": 7,
+          "filepath_local": null,
+          "id": 495214515,
+          "is_available": false,
+          "pacer_doc_id": "127040422836",
+          "page_count": null,
+          "short_description": ""
+        },
+        {
+          "absolute_url": "/docket/74857693/8/valdez-v-kellogg-supply-inc/",
+          "attachment_number": null,
+          "description": "MOTION re 1 Complaint, to Dismiss the Complaint by Kellogg Supply, Inc.. (Attachments: # 1 Memo of Points and Authorities, # 2 Declaration, # 3 Request for Judicial Notice)(Lytle, Douglas) (anh). [Transferred from California Southern on 9/27/2026.] (Entered: 01/16/2026)",
+          "docket_entry_id": 479559098,
+          "document_number": 8,
+          "document_type": "PACER Document",
+          "entry_date_filed": "2026-01-16",
+          "entry_number": 8,
+          "filepath_local": null,
+          "id": 495214516,
+          "is_available": false,
+          "pacer_doc_id": "127040422839",
+          "page_count": null,
+          "short_description": ""
+        }
+      ]
+    },
+    {
+      "docket_id": 74857963,
+      "caseName": "Smallback v. Aprio Advisory Group, LLC",
+      "case_name_full": "",
+      "court": "District Court, N.D. Georgia",
+      "court_id": "gand",
+      "docketNumber": "1:26-cv-05539",
+      "dateFiled": "2026-09-25",
+      "dateTerminated": null,
+      "suitNature": "190 Contract: Other",
+      "cause": "28:1332 Diversity-Breach of Fiduciary Duty",
+      "docket_absolute_url": "/docket/74857963/smallback-v-aprio-advisory-group-llc/",
+      "recap_documents": [
+        {
+          "absolute_url": "/docket/74857963/1/smallback-v-aprio-advisory-group-llc/",
+          "attachment_number": null,
+          "description": "CLASS ACTION COMPLAINT with Jury Demand filed by Tiffany Smallback. (Filing fee $405, receipt number AGANDC-15578962) (Attachments: # 1 Civil Cover Sheet)(aeh) Please visit our website at http://www.gand.uscourts.gov/commonly-used-forms to obtain Pretrial Instructions and Pretrial Associated Forms which includes the Consent To Proceed Before U.S. Magistrate form. (Entered: 09/28/2026)",
+          "docket_entry_id": 479597524,
+          "document_number": 1,
+          "document_type": "PACER Document",
+          "entry_date_filed": "2026-09-25",
+          "entry_number": 1,
+          "filepath_local": "recap/gov.uscourts.gand.365522/gov.uscourts.gand.365522.1.0.pdf",
+          "id": 495259948,
+          "is_available": true,
+          "pacer_doc_id": "055018745674",
+          "page_count": 70,
+          "short_description": ""
+        },
+        {
+          "absolute_url": "/docket/74857963/1/1/smallback-v-aprio-advisory-group-llc/",
+          "attachment_number": 1,
+          "description": "CLASS ACTION COMPLAINT with Jury Demand filed by Tiffany Smallback. (Filing fee $405, receipt number AGANDC-15578962) (Attachments: # 1 Civil Cover Sheet)(aeh) Please visit our website at http://www.gand.uscourts.gov/commonly-used-forms to obtain Pretrial Instructions and Pretrial Associated Forms which includes the Consent To Proceed Before U.S. Magistrate form. (Entered: 09/28/2026)",
+          "docket_entry_id": 479597524,
+          "document_number": 1,
+          "document_type": "Attachment",
+          "entry_date_filed": "2026-09-25",
+          "entry_number": 1,
+          "filepath_local": null,
+          "id": 495274574,
+          "is_available": false,
+          "pacer_doc_id": "055018745675",
+          "page_count": 2,
+          "short_description": "Civil Cover Sheet"
+        }
+      ]
+    },
+    {
+      "docket_id": 74856558,
+      "caseName": "Briceno v. Vive Organic, Inc.",
+      "case_name_full": "",
+      "court": "District Court, S.D. New York",
+      "court_id": "nysd",
+      "docketNumber": "1:26-cv-08431",
+      "dateFiled": "2026-09-25",
+      "dateTerminated": null,
+      "suitNature": "370 Other Fraud",
+      "cause": "28:1332t Diversity-Torts",
+      "docket_absolute_url": "/docket/74856558/briceno-v-vive-organic-inc/",
+      "recap_documents": [
+        {
+          "absolute_url": "/docket/74856558/1/briceno-v-vive-organic-inc/",
+          "attachment_number": null,
+          "description": "COMPLAINT against Vive Organic, Inc.. (Filing Fee $ 405.00, Receipt Number ANYSDC-33507589)Document filed by Jamie Briceno..(Nam, Sue) (Entered: 09/25/2026)",
+          "docket_entry_id": 479511265,
+          "document_number": 1,
+          "document_type": "PACER Document",
+          "entry_date_filed": "2026-09-25",
+          "entry_number": 1,
+          "filepath_local": "recap/gov.uscourts.nysd.673678/gov.uscourts.nysd.673678.1.0.pdf",
+          "id": 495164469,
+          "is_available": true,
+          "pacer_doc_id": "127040420786",
+          "page_count": 22,
+          "short_description": "Complaint"
+        }
+      ]
+    },
+    {
+      "docket_id": 74856516,
+      "caseName": "Bianco v. The Republic of the Sudan",
+      "case_name_full": "",
+      "court": "District Court, S.D. New York",
+      "court_id": "nysd",
+      "docketNumber": "1:26-cv-08429",
+      "dateFiled": "2026-09-25",
+      "dateTerminated": null,
+      "suitNature": "890 Other Statutory Actions",
+      "cause": "18:2333 Civil Remedies: Anti-Terrorism Act of 1991",
+      "docket_absolute_url": "/docket/74856516/bianco-v-the-republic-of-the-sudan/",
+      "recap_documents": [
+        {
+          "absolute_url": "/docket/74856516/1/bianco-v-the-republic-of-the-sudan/",
+          "attachment_number": null,
+          "description": "COMPLAINT against The Republic of the Sudan. (Filing Fee $ 405.00, Receipt Number ANYSDC-33507427)Document filed by Charles Schroeder, Barry Allen (as Personal Representative of the Estate of Laetita \"Letty\" Allen, deceased, the late parent of Eric Allen), John Doe 70, Angeli Ylanan Agarwala, Michael Bianco, August Bernaerts, Joan Ruth Puwalski, Nadine Pappas-Wilkes, Barry Allen(as Personal Representative of the Estate of Edward Allen, deceased, the late sibling of Eric Allen), John Doe 134, Aaron Antigua, John Doe 76, Barbara Ann Sullivan, Ramona Schroeder, Marian Allen, Rhea Shome, Caitlin Antigua, Barry Allen(individually, as surviving sibling of Eric Allen)..(Goldman, Jerry) (Entered: 09/25/2026)",
+          "docket_entry_id": 479508385,
+          "document_number": 1,
+          "document_type": "PACER Document",
+          "entry_date_filed": "2026-09-25",
+          "entry_number": 1,
+          "filepath_local": "recap/gov.uscourts.nysd.673676/gov.uscourts.nysd.673676.1.0.pdf",
+          "id": 495161503,
+          "is_available": true,
+          "pacer_doc_id": "127040420459",
+          "page_count": 14,
+          "short_description": "Complaint"
+        }
+      ]
+    }
+  ]
+}

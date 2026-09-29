@@ -1,0 +1,339 @@
+{
+  "_note": "SAMPLE DATA for local development. Every company, brand, party and case here is fictional. Loaded with is_sample=1 and source='sample'. Do not attach these lawsuits to real brands.",
+  "brands": [
+    { "name": "Acme Cola", "parentCompany": "Acme Beverage Co.", "category": "beverage", "aliases": ["Acme Cola Zero", "Acme Soda"] },
+    { "name": "Acme Lemon Fizz", "parentCompany": "Acme Beverage Co.", "category": "beverage", "aliases": [] },
+    { "name": "Brightsmile Toothpaste", "parentCompany": "Brightsmile Oral Care Inc.", "category": "personal_care", "aliases": ["Brightsmile"] },
+    { "name": "Sunpeak Vitamins", "parentCompany": "Sunpeak Wellness LLC", "category": "supplement", "aliases": ["Sunpeak"] },
+    { "name": "Glowmere Skincare", "parentCompany": "Glowmere Labs Inc.", "category": "personal_care", "aliases": ["Glowmere"] },
+    { "name": "Northwind Wireless", "parentCompany": "Northwind Telecom Corp.", "category": "telecom", "aliases": ["Northwind", "NWIND WIRELESS"] },
+    { "name": "Pixelstream", "parentCompany": "Pixelstream Media Inc.", "category": "streaming", "aliases": ["PIXELSTREAM.TV"] },
+    { "name": "Fleetride", "parentCompany": "Fleetride Technologies Inc.", "category": "rideshare", "aliases": ["FLEETRIDE TRIP"] },
+    { "name": "Crumbly Crackers", "parentCompany": "Crumbly Snack Co.", "category": "snack", "aliases": ["Crumbly"] },
+    { "name": "Purepaws Pet Food", "parentCompany": "Purepaws Nutrition LLC", "category": "pet", "aliases": ["Purepaws"] },
+    { "name": "Harborlight Bank", "parentCompany": "Harborlight Financial Corp.", "category": "bank", "aliases": ["Harborlight"] },
+    { "name": "Bluejay Air", "parentCompany": "Bluejay Airways Inc.", "category": "airline", "aliases": ["Bluejay Airways"] },
+    { "name": "Voltcycle", "parentCompany": "Voltcycle Fitness Inc.", "category": "fitness", "aliases": ["Voltcycle Bike"] },
+    { "name": "Cloudnest", "parentCompany": "Cloudnest Software Inc.", "category": "software", "aliases": ["Cloudnest Storage"] },
+    { "name": "Freshfold Detergent", "parentCompany": "Freshfold Home Products Inc.", "category": "household", "aliases": ["Freshfold"] },
+    { "name": "Tinyleaf Baby Formula", "parentCompany": "Tinyleaf Nutrition Co.", "category": "baby", "aliases": ["Tinyleaf"] }
+  ],
+  "cases": [
+    {
+      "slug": "acme-cola-sugar-labeling",
+      "caseName": "Rivera v. Acme Beverage Co. (SAMPLE)",
+      "court": "U.S. District Court, Sample District",
+      "docketNumber": "SAMPLE-1:24-cv-01001",
+      "dateFiled": "2024-02-12",
+      "status": "claims_open",
+      "natureOfSuit": "370 Other Fraud",
+      "summary": "SAMPLE CASE. Buyers say Acme Cola Zero and Acme Lemon Fizz were labeled \"no sugar added\" even though they contained added fruit-juice sugars. The company denies wrongdoing but agreed to a settlement.",
+      "whoQualifies": "Anyone in the U.S. who bought Acme Cola Zero or Acme Lemon Fizz between January 1, 2020 and June 30, 2025.",
+      "claimUrl": "https://example.com/claim",
+      "claimDeadline": "2027-03-31",
+      "settlementAmount": "$4,500,000",
+      "states": [],
+      "categories": ["food_labeling", "beverage"],
+      "brands": [
+        { "name": "Acme Cola", "products": ["Acme Cola Zero 12 oz can"] },
+        { "name": "Acme Lemon Fizz", "products": ["Acme Lemon Fizz 2 L bottle"] }
+      ],
+      "docketEntries": [
+        { "entryNumber": 1, "dateFiled": "2024-02-12", "description": "CLASS ACTION COMPLAINT against Acme Beverage Co. (SAMPLE)" },
+        { "entryNumber": 42, "dateFiled": "2025-09-03", "description": "MOTION for Preliminary Approval of Class Action Settlement (SAMPLE)" },
+        { "entryNumber": 51, "dateFiled": "2026-06-18", "description": "ORDER granting Final Approval of Class Action Settlement (SAMPLE)" }
+      ]
+    },
+    {
+      "slug": "brightsmile-whitening-claims",
+      "caseName": "Okafor v. Brightsmile Oral Care Inc. (SAMPLE)",
+      "court": "U.S. District Court, Sample District",
+      "docketNumber": "SAMPLE-2:23-cv-02002",
+      "dateFiled": "2023-08-30",
+      "status": "claims_open",
+      "natureOfSuit": "370 Other Fraud",
+      "summary": "SAMPLE CASE. Plaintiffs claim Brightsmile Whitening Toothpaste did not whiten teeth \"in 3 days\" as advertised. A settlement gives refunds to buyers.",
+      "whoQualifies": "U.S. residents who bought Brightsmile Whitening Toothpaste from 2019 through 2025. Proof of purchase needed for more than 5 tubes.",
+      "claimUrl": "https://example.com/claim",
+      "claimDeadline": "2026-12-15",
+      "settlementAmount": "$2,100,000",
+      "states": [],
+      "categories": ["false_advertising", "personal_care"],
+      "brands": [{ "name": "Brightsmile Toothpaste", "products": ["Brightsmile Whitening Toothpaste"] }],
+      "docketEntries": [
+        { "entryNumber": 1, "dateFiled": "2023-08-30", "description": "CLASS ACTION COMPLAINT (SAMPLE)" },
+        { "entryNumber": 60, "dateFiled": "2026-07-01", "description": "FINAL JUDGMENT and Order Approving Settlement (SAMPLE)" }
+      ]
+    },
+    {
+      "slug": "sunpeak-vitamin-potency",
+      "caseName": "Lindqvist v. Sunpeak Wellness LLC (SAMPLE)",
+      "court": "U.S. District Court, Sample District",
+      "docketNumber": "SAMPLE-3:24-cv-03003",
+      "dateFiled": "2024-05-06",
+      "status": "claims_open",
+      "natureOfSuit": "370 Other Fraud",
+      "summary": "SAMPLE CASE. Independent tests allegedly found Sunpeak Vitamin D gummies had far less vitamin D than the label said. Settlement approved; claim forms are open.",
+      "whoQualifies": "Anyone who bought Sunpeak Vitamin D or Sunpeak Multivitamin gummies in California, Oregon or Washington since May 2020.",
+      "claimUrl": "https://example.com/claim",
+      "claimDeadline": "2027-01-31",
+      "settlementAmount": "$800,000",
+      "states": ["CA", "OR", "WA"],
+      "categories": ["supplement", "product_labeling"],
+      "brands": [{ "name": "Sunpeak Vitamins", "products": ["Sunpeak Vitamin D Gummies", "Sunpeak Multivitamin Gummies"] }],
+      "docketEntries": [
+        { "entryNumber": 1, "dateFiled": "2024-05-06", "description": "COMPLAINT - Class Action (SAMPLE)" },
+        { "entryNumber": 38, "dateFiled": "2026-08-20", "description": "ORDER granting Final Approval (SAMPLE)" }
+      ]
+    },
+    {
+      "slug": "glowmere-benzene-sunscreen",
+      "caseName": "Patel v. Glowmere Labs Inc. (SAMPLE)",
+      "court": "U.S. District Court, Sample District",
+      "docketNumber": "SAMPLE-1:24-cv-04004",
+      "dateFiled": "2024-07-19",
+      "status": "settlement_pending",
+      "natureOfSuit": "365 Personal Inj. Prod. Liability",
+      "summary": "SAMPLE CASE. Buyers allege Glowmere SPF 50 spray sunscreen contained a contaminant not listed on the label. A proposed settlement awaits court approval.",
+      "whoQualifies": "People who bought Glowmere SPF 50 spray sunscreen between 2021 and 2024.",
+      "claimUrl": null,
+      "claimDeadline": null,
+      "settlementAmount": "$1,250,000 (proposed)",
+      "states": [],
+      "categories": ["personal_care", "contamination"],
+      "brands": [{ "name": "Glowmere Skincare", "products": ["Glowmere SPF 50 Spray"] }],
+      "docketEntries": [
+        { "entryNumber": 1, "dateFiled": "2024-07-19", "description": "CLASS ACTION COMPLAINT (SAMPLE)" },
+        { "entryNumber": 29, "dateFiled": "2026-08-11", "description": "MOTION for Preliminary Approval of Settlement (SAMPLE)" }
+      ]
+    },
+    {
+      "slug": "northwind-admin-fee",
+      "caseName": "Nguyen v. Northwind Telecom Corp. (SAMPLE)",
+      "court": "U.S. District Court, Sample District",
+      "docketNumber": "SAMPLE-4:23-cv-05005",
+      "dateFiled": "2023-03-14",
+      "status": "certified",
+      "natureOfSuit": "890 Other Statutory Actions",
+      "summary": "SAMPLE CASE. Customers say Northwind Wireless raised a monthly \"administrative fee\" while advertising a price lock. The court certified a class of postpaid customers.",
+      "whoQualifies": "Northwind Wireless postpaid customers charged the administrative fee from 2019 to 2023. Class members are included automatically.",
+      "claimUrl": null,
+      "claimDeadline": null,
+      "settlementAmount": null,
+      "states": [],
+      "categories": ["telecom", "hidden_fees"],
+      "brands": [{ "name": "Northwind Wireless", "products": ["Postpaid wireless plans"] }],
+      "docketEntries": [
+        { "entryNumber": 1, "dateFiled": "2023-03-14", "description": "CLASS ACTION COMPLAINT (SAMPLE)" },
+        { "entryNumber": 112, "dateFiled": "2025-11-05", "description": "ORDER granting Motion for Class Certification (SAMPLE)" }
+      ]
+    },
+    {
+      "slug": "pixelstream-auto-renewal",
+      "caseName": "Brooks v. Pixelstream Media Inc. (SAMPLE)",
+      "court": "U.S. District Court, Sample District",
+      "docketNumber": "SAMPLE-2:26-cv-06006",
+      "dateFiled": "2026-06-02",
+      "status": "filed",
+      "natureOfSuit": "890 Other Statutory Actions",
+      "summary": "SAMPLE CASE. Subscribers allege Pixelstream made cancelling hard and kept charging after free trials ended, in violation of state auto-renewal laws.",
+      "whoQualifies": "Proposed class: Pixelstream subscribers in New York and California who were charged after a free trial since 2022. No class has been certified yet.",
+      "claimUrl": null,
+      "claimDeadline": null,
+      "settlementAmount": null,
+      "states": ["NY", "CA"],
+      "categories": ["subscription", "auto_renewal"],
+      "brands": [{ "name": "Pixelstream", "products": ["Pixelstream Premium subscription"] }],
+      "docketEntries": [
+        { "entryNumber": 1, "dateFiled": "2026-06-02", "description": "CLASS ACTION COMPLAINT (SAMPLE)" }
+      ]
+    },
+    {
+      "slug": "fleetride-booking-fee",
+      "caseName": "Alvarez v. Fleetride Technologies Inc. (SAMPLE)",
+      "court": "U.S. District Court, Sample District",
+      "docketNumber": "SAMPLE-3:26-cv-07007",
+      "dateFiled": "2026-08-21",
+      "status": "filed",
+      "natureOfSuit": "370 Other Fraud",
+      "summary": "SAMPLE CASE. Riders say Fleetride showed one price when booking and added a \"service booking fee\" afterward.",
+      "whoQualifies": "Proposed class: Fleetride riders in the U.S. charged the booking fee since 2023.",
+      "claimUrl": null,
+      "claimDeadline": null,
+      "settlementAmount": null,
+      "states": [],
+      "categories": ["rideshare", "hidden_fees"],
+      "brands": [{ "name": "Fleetride", "products": ["Fleetride rides"] }],
+      "docketEntries": [
+        { "entryNumber": 1, "dateFiled": "2026-08-21", "description": "COMPLAINT - Class Action (SAMPLE)" }
+      ]
+    },
+    {
+      "slug": "voltcycle-seat-post",
+      "caseName": "Kim v. Voltcycle Fitness Inc. (SAMPLE)",
+      "court": "U.S. District Court, Sample District",
+      "docketNumber": "SAMPLE-1:26-cv-08008",
+      "dateFiled": "2026-04-10",
+      "status": "filed",
+      "natureOfSuit": "385 Prop. Damage Prod. Liability",
+      "summary": "SAMPLE CASE. Owners allege the Voltcycle indoor bike seat post can snap during use and want repairs or refunds.",
+      "whoQualifies": "Proposed class: people who bought a Voltcycle Model V1 bike in the U.S.",
+      "claimUrl": null,
+      "claimDeadline": null,
+      "settlementAmount": null,
+      "states": [],
+      "categories": ["fitness", "product_defect"],
+      "brands": [{ "name": "Voltcycle", "products": ["Voltcycle Model V1"] }],
+      "docketEntries": [
+        { "entryNumber": 1, "dateFiled": "2026-04-10", "description": "CLASS ACTION COMPLAINT (SAMPLE)" },
+        { "entryNumber": 14, "dateFiled": "2026-07-22", "description": "MOTION to Dismiss (SAMPLE)" }
+      ]
+    },
+    {
+      "slug": "bluejay-refunds",
+      "caseName": "Thompson v. Bluejay Airways Inc. (SAMPLE)",
+      "court": "U.S. District Court, Sample District",
+      "docketNumber": "SAMPLE-2:22-cv-09009",
+      "dateFiled": "2022-10-03",
+      "status": "certified",
+      "natureOfSuit": "190 Contract: Other",
+      "summary": "SAMPLE CASE. Passengers say Bluejay Air gave travel vouchers instead of cash refunds for flights it cancelled. A class was certified.",
+      "whoQualifies": "Passengers whose Bluejay Air flights were cancelled by the airline in 2021-2022 and who did not get a cash refund.",
+      "claimUrl": null,
+      "claimDeadline": null,
+      "settlementAmount": null,
+      "states": [],
+      "categories": ["airline", "refunds"],
+      "brands": [{ "name": "Bluejay Air", "products": ["Airline tickets"] }],
+      "docketEntries": [
+        { "entryNumber": 1, "dateFiled": "2022-10-03", "description": "CLASS ACTION COMPLAINT (SAMPLE)" },
+        { "entryNumber": 88, "dateFiled": "2025-02-27", "description": "ORDER certifying class (SAMPLE)" }
+      ]
+    },
+    {
+      "slug": "harborlight-overdraft",
+      "caseName": "Washington v. Harborlight Financial Corp. (SAMPLE)",
+      "court": "U.S. District Court, Sample District",
+      "docketNumber": "SAMPLE-4:24-cv-10010",
+      "dateFiled": "2024-01-22",
+      "status": "settlement_pending",
+      "natureOfSuit": "190 Contract: Other",
+      "summary": "SAMPLE CASE. Customers claim Harborlight Bank charged overdraft fees on transactions that had enough money when approved. A settlement is awaiting final approval.",
+      "whoQualifies": "Harborlight Bank checking customers charged these overdraft fees between 2018 and 2024.",
+      "claimUrl": null,
+      "claimDeadline": null,
+      "settlementAmount": "$3,000,000 (proposed)",
+      "states": ["FL", "GA"],
+      "categories": ["bank", "fees"],
+      "brands": [{ "name": "Harborlight Bank", "products": ["Checking accounts"] }],
+      "docketEntries": [
+        { "entryNumber": 1, "dateFiled": "2024-01-22", "description": "CLASS ACTION COMPLAINT (SAMPLE)" },
+        { "entryNumber": 47, "dateFiled": "2026-05-15", "description": "ORDER granting Preliminary Approval (SAMPLE)" }
+      ]
+    },
+    {
+      "slug": "purepaws-grain-free",
+      "caseName": "Schmidt v. Purepaws Nutrition LLC (SAMPLE)",
+      "court": "U.S. District Court, Sample District",
+      "docketNumber": "SAMPLE-1:21-cv-11011",
+      "dateFiled": "2021-04-09",
+      "status": "claims_closed",
+      "natureOfSuit": "370 Other Fraud",
+      "summary": "SAMPLE CASE. Pet owners alleged Purepaws \"human-grade\" dog food did not meet that standard. The settlement claim period has ended.",
+      "whoQualifies": "Buyers of Purepaws dry dog food from 2017 to 2021. The claim deadline has passed.",
+      "claimUrl": "https://example.com/claim",
+      "claimDeadline": "2025-06-30",
+      "settlementAmount": "$650,000",
+      "states": [],
+      "categories": ["pet", "false_advertising"],
+      "brands": [{ "name": "Purepaws Pet Food", "products": ["Purepaws dry dog food"] }],
+      "docketEntries": [
+        { "entryNumber": 1, "dateFiled": "2021-04-09", "description": "CLASS ACTION COMPLAINT (SAMPLE)" },
+        { "entryNumber": 73, "dateFiled": "2025-01-10", "description": "FINAL APPROVAL ORDER (SAMPLE)" }
+      ]
+    },
+    {
+      "slug": "freshfold-pods-residue",
+      "caseName": "Garcia v. Freshfold Home Products Inc. (SAMPLE)",
+      "court": "U.S. District Court, Sample District",
+      "docketNumber": "SAMPLE-3:22-cv-12012",
+      "dateFiled": "2022-09-15",
+      "status": "claims_closed",
+      "natureOfSuit": "385 Prop. Damage Prod. Liability",
+      "summary": "SAMPLE CASE. Buyers said Freshfold laundry pods left stains on clothes. The settlement paid claims; the deadline has passed.",
+      "whoQualifies": "U.S. buyers of Freshfold laundry pods from 2020 to 2022. Claims are closed.",
+      "claimUrl": "https://example.com/claim",
+      "claimDeadline": "2026-02-28",
+      "settlementAmount": "$1,100,000",
+      "states": [],
+      "categories": ["household", "product_defect"],
+      "brands": [{ "name": "Freshfold Detergent", "products": ["Freshfold laundry pods"] }],
+      "docketEntries": [
+        { "entryNumber": 1, "dateFiled": "2022-09-15", "description": "CLASS ACTION COMPLAINT (SAMPLE)" },
+        { "entryNumber": 66, "dateFiled": "2025-10-02", "description": "FINAL JUDGMENT (SAMPLE)" }
+      ]
+    },
+    {
+      "slug": "crumbly-crackers-whole-grain",
+      "caseName": "Adams v. Crumbly Snack Co. (SAMPLE)",
+      "court": "U.S. District Court, Sample District",
+      "docketNumber": "SAMPLE-2:23-cv-13013",
+      "dateFiled": "2023-05-01",
+      "status": "dismissed",
+      "natureOfSuit": "370 Other Fraud",
+      "summary": "SAMPLE CASE. A buyer claimed \"made with whole grain\" on Crumbly Crackers was misleading. The court dismissed the case.",
+      "whoQualifies": "No one - the case was dismissed.",
+      "claimUrl": null,
+      "claimDeadline": null,
+      "settlementAmount": null,
+      "states": [],
+      "categories": ["food_labeling"],
+      "brands": [{ "name": "Crumbly Crackers", "products": ["Crumbly Whole Grain Crackers"] }],
+      "docketEntries": [
+        { "entryNumber": 1, "dateFiled": "2023-05-01", "description": "CLASS ACTION COMPLAINT (SAMPLE)" },
+        { "entryNumber": 31, "dateFiled": "2024-03-18", "description": "ORDER granting Motion to Dismiss with prejudice (SAMPLE)" }
+      ]
+    },
+    {
+      "slug": "tinyleaf-formula-marketing",
+      "caseName": "Hughes v. Tinyleaf Nutrition Co. (SAMPLE)",
+      "court": "U.S. District Court, Sample District",
+      "docketNumber": "SAMPLE-4:24-cv-14014",
+      "dateFiled": "2024-09-09",
+      "status": "dismissed",
+      "natureOfSuit": "370 Other Fraud",
+      "summary": "SAMPLE CASE. Parents alleged Tinyleaf formula marketing overstated brain-development benefits. The plaintiffs voluntarily dismissed the case.",
+      "whoQualifies": "No one - the case was dismissed.",
+      "claimUrl": null,
+      "claimDeadline": null,
+      "settlementAmount": null,
+      "states": [],
+      "categories": ["baby", "false_advertising"],
+      "brands": [{ "name": "Tinyleaf Baby Formula", "products": ["Tinyleaf Stage 1 Formula"] }],
+      "docketEntries": [
+        { "entryNumber": 1, "dateFiled": "2024-09-09", "description": "CLASS ACTION COMPLAINT (SAMPLE)" },
+        { "entryNumber": 9, "dateFiled": "2025-01-06", "description": "NOTICE of Voluntary Dismissal (SAMPLE)" }
+      ]
+    },
+    {
+      "slug": "cloudnest-data-breach",
+      "caseName": "In re Cloudnest Software Data Security Incident (SAMPLE)",
+      "court": "U.S. District Court, Sample District",
+      "docketNumber": "SAMPLE-1:26-cv-15015",
+      "dateFiled": "2026-09-01",
+      "status": "unknown",
+      "natureOfSuit": "890 Other Statutory Actions",
+      "summary": null,
+      "whoQualifies": null,
+      "claimUrl": null,
+      "claimDeadline": null,
+      "settlementAmount": null,
+      "states": [],
+      "categories": ["data_breach"],
+      "brands": [{ "name": "Cloudnest", "products": ["Cloudnest cloud storage"] }],
+      "docketEntries": [
+        { "entryNumber": 1, "dateFiled": "2026-09-01", "description": "CONSOLIDATED CLASS ACTION COMPLAINT (SAMPLE)" }
+      ]
+    }
+  ]
+}

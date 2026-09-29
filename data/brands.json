@@ -1,0 +1,1982 @@
+[
+  {
+    "name": "Coca-Cola",
+    "parentCompany": "The Coca-Cola Company",
+    "category": "beverage",
+    "aliases": [
+      "Coke",
+      "Coca Cola",
+      "Diet Coke",
+      "Coke Zero",
+      "Coca-Cola Zero Sugar"
+    ]
+  },
+  {
+    "name": "Dasani",
+    "parentCompany": "The Coca-Cola Company",
+    "category": "beverage",
+    "aliases": []
+  },
+  {
+    "name": "Minute Maid",
+    "parentCompany": "The Coca-Cola Company",
+    "category": "beverage",
+    "aliases": []
+  },
+  {
+    "name": "Sprite",
+    "parentCompany": "The Coca-Cola Company",
+    "category": "beverage",
+    "aliases": []
+  },
+  {
+    "name": "Fanta",
+    "parentCompany": "The Coca-Cola Company",
+    "category": "beverage",
+    "aliases": []
+  },
+  {
+    "name": "Smartwater",
+    "parentCompany": "The Coca-Cola Company",
+    "category": "beverage",
+    "aliases": [
+      "smartwater",
+      "glaceau smartwater"
+    ]
+  },
+  {
+    "name": "Vitaminwater",
+    "parentCompany": "The Coca-Cola Company",
+    "category": "beverage",
+    "aliases": [
+      "vitamin water",
+      "glaceau vitaminwater"
+    ]
+  },
+  {
+    "name": "Powerade",
+    "parentCompany": "The Coca-Cola Company",
+    "category": "beverage",
+    "aliases": []
+  },
+  {
+    "name": "Pepsi",
+    "parentCompany": "PepsiCo",
+    "category": "beverage",
+    "aliases": [
+      "Pepsi-Cola",
+      "Diet Pepsi",
+      "Pepsi Zero Sugar"
+    ]
+  },
+  {
+    "name": "Mountain Dew",
+    "parentCompany": "PepsiCo",
+    "category": "beverage",
+    "aliases": [
+      "Mtn Dew"
+    ]
+  },
+  {
+    "name": "Gatorade",
+    "parentCompany": "PepsiCo",
+    "category": "beverage",
+    "aliases": []
+  },
+  {
+    "name": "Aquafina",
+    "parentCompany": "PepsiCo",
+    "category": "beverage",
+    "aliases": []
+  },
+  {
+    "name": "Lay's",
+    "parentCompany": "PepsiCo",
+    "category": "snack",
+    "aliases": [
+      "Lays",
+      "Frito-Lay"
+    ]
+  },
+  {
+    "name": "Doritos",
+    "parentCompany": "PepsiCo",
+    "category": "snack",
+    "aliases": []
+  },
+  {
+    "name": "Cheetos",
+    "parentCompany": "PepsiCo",
+    "category": "snack",
+    "aliases": []
+  },
+  {
+    "name": "Quaker",
+    "parentCompany": "PepsiCo",
+    "category": "food",
+    "aliases": [
+      "Quaker Oats"
+    ]
+  },
+  {
+    "name": "Dr Pepper",
+    "parentCompany": "Keurig Dr Pepper",
+    "category": "beverage",
+    "aliases": [
+      "Dr. Pepper"
+    ]
+  },
+  {
+    "name": "Keurig",
+    "parentCompany": "Keurig Dr Pepper",
+    "category": "appliance",
+    "aliases": [
+      "K-Cup",
+      "K-Cups"
+    ]
+  },
+  {
+    "name": "Snapple",
+    "parentCompany": "Keurig Dr Pepper",
+    "category": "beverage",
+    "aliases": []
+  },
+  {
+    "name": "Canada Dry",
+    "parentCompany": "Keurig Dr Pepper",
+    "category": "beverage",
+    "aliases": []
+  },
+  {
+    "name": "Red Bull",
+    "parentCompany": "Red Bull GmbH",
+    "category": "beverage",
+    "aliases": []
+  },
+  {
+    "name": "Monster Energy",
+    "parentCompany": "Monster Beverage Corporation",
+    "category": "beverage",
+    "aliases": [
+      "Monster"
+    ]
+  },
+  {
+    "name": "Celsius",
+    "parentCompany": "Celsius Holdings",
+    "category": "beverage",
+    "aliases": []
+  },
+  {
+    "name": "LaCroix",
+    "parentCompany": "National Beverage Corp.",
+    "category": "beverage",
+    "aliases": [
+      "La Croix"
+    ]
+  },
+  {
+    "name": "Fiji Water",
+    "parentCompany": "The Wonderful Company",
+    "category": "beverage",
+    "aliases": [
+      "FIJI"
+    ]
+  },
+  {
+    "name": "Nespresso",
+    "parentCompany": "Nestlé",
+    "category": "beverage",
+    "aliases": []
+  },
+  {
+    "name": "Gerber",
+    "parentCompany": "Nestlé",
+    "category": "baby",
+    "aliases": []
+  },
+  {
+    "name": "Purina",
+    "parentCompany": "Nestlé",
+    "category": "pet",
+    "aliases": [
+      "Purina ONE",
+      "Purina Pro Plan",
+      "Friskies"
+    ]
+  },
+  {
+    "name": "Stouffer's",
+    "parentCompany": "Nestlé",
+    "category": "food",
+    "aliases": [
+      "Stouffers"
+    ]
+  },
+  {
+    "name": "Hot Pockets",
+    "parentCompany": "Nestlé",
+    "category": "food",
+    "aliases": []
+  },
+  {
+    "name": "Nature's Bounty",
+    "parentCompany": "Nestlé Health Science",
+    "category": "supplement",
+    "aliases": [
+      "Natures Bounty"
+    ]
+  },
+  {
+    "name": "Garden of Life",
+    "parentCompany": "Nestlé Health Science",
+    "category": "supplement",
+    "aliases": []
+  },
+  {
+    "name": "Cheerios",
+    "parentCompany": "General Mills",
+    "category": "food",
+    "aliases": [
+      "Honey Nut Cheerios"
+    ]
+  },
+  {
+    "name": "Nature Valley",
+    "parentCompany": "General Mills",
+    "category": "snack",
+    "aliases": []
+  },
+  {
+    "name": "Annie's",
+    "parentCompany": "General Mills",
+    "category": "food",
+    "aliases": [
+      "Annies"
+    ]
+  },
+  {
+    "name": "Blue Buffalo",
+    "parentCompany": "General Mills",
+    "category": "pet",
+    "aliases": [
+      "Blue Buffalo Pet Products"
+    ]
+  },
+  {
+    "name": "Kellogg's",
+    "parentCompany": "WK Kellogg Co",
+    "category": "food",
+    "aliases": [
+      "Kelloggs",
+      "Frosted Flakes",
+      "Froot Loops"
+    ]
+  },
+  {
+    "name": "Pringles",
+    "parentCompany": "Kellanova",
+    "category": "snack",
+    "aliases": []
+  },
+  {
+    "name": "Cheez-It",
+    "parentCompany": "Kellanova",
+    "category": "snack",
+    "aliases": [
+      "Cheez It"
+    ]
+  },
+  {
+    "name": "Kraft",
+    "parentCompany": "The Kraft Heinz Company",
+    "category": "food",
+    "aliases": [
+      "Kraft Mac & Cheese"
+    ]
+  },
+  {
+    "name": "Heinz",
+    "parentCompany": "The Kraft Heinz Company",
+    "category": "food",
+    "aliases": [
+      "Heinz Ketchup"
+    ]
+  },
+  {
+    "name": "Oscar Mayer",
+    "parentCompany": "The Kraft Heinz Company",
+    "category": "food",
+    "aliases": []
+  },
+  {
+    "name": "Lunchables",
+    "parentCompany": "The Kraft Heinz Company",
+    "category": "food",
+    "aliases": []
+  },
+  {
+    "name": "M&M's",
+    "parentCompany": "Mars, Incorporated",
+    "category": "candy",
+    "aliases": [
+      "M&Ms",
+      "M and Ms"
+    ]
+  },
+  {
+    "name": "Snickers",
+    "parentCompany": "Mars, Incorporated",
+    "category": "candy",
+    "aliases": []
+  },
+  {
+    "name": "Pedigree",
+    "parentCompany": "Mars, Incorporated",
+    "category": "pet",
+    "aliases": []
+  },
+  {
+    "name": "Ben's Original",
+    "parentCompany": "Mars, Incorporated",
+    "category": "food",
+    "aliases": [
+      "Uncle Ben's"
+    ]
+  },
+  {
+    "name": "Kind",
+    "parentCompany": "Mars, Incorporated",
+    "category": "snack",
+    "aliases": [
+      "KIND Bars",
+      "Kind Snacks"
+    ]
+  },
+  {
+    "name": "Hershey's",
+    "parentCompany": "The Hershey Company",
+    "category": "candy",
+    "aliases": [
+      "Hersheys"
+    ]
+  },
+  {
+    "name": "Reese's",
+    "parentCompany": "The Hershey Company",
+    "category": "candy",
+    "aliases": [
+      "Reeses"
+    ]
+  },
+  {
+    "name": "Oreo",
+    "parentCompany": "Mondelez International",
+    "category": "snack",
+    "aliases": [
+      "Oreos"
+    ]
+  },
+  {
+    "name": "Ritz",
+    "parentCompany": "Mondelez International",
+    "category": "snack",
+    "aliases": [
+      "Ritz Crackers"
+    ]
+  },
+  {
+    "name": "Clif Bar",
+    "parentCompany": "Mondelez International",
+    "category": "snack",
+    "aliases": [
+      "Clif"
+    ]
+  },
+  {
+    "name": "Campbell's",
+    "parentCompany": "The Campbell's Company",
+    "category": "food",
+    "aliases": [
+      "Campbells",
+      "Campbell Soup"
+    ]
+  },
+  {
+    "name": "Goldfish",
+    "parentCompany": "The Campbell's Company",
+    "category": "snack",
+    "aliases": [
+      "Pepperidge Farm Goldfish"
+    ]
+  },
+  {
+    "name": "Tyson",
+    "parentCompany": "Tyson Foods",
+    "category": "food",
+    "aliases": [
+      "Tyson Foods"
+    ]
+  },
+  {
+    "name": "Jimmy Dean",
+    "parentCompany": "Tyson Foods",
+    "category": "food",
+    "aliases": []
+  },
+  {
+    "name": "Hillshire Farm",
+    "parentCompany": "Tyson Foods",
+    "category": "food",
+    "aliases": []
+  },
+  {
+    "name": "Spam",
+    "parentCompany": "Hormel Foods",
+    "category": "food",
+    "aliases": []
+  },
+  {
+    "name": "Skippy",
+    "parentCompany": "Hormel Foods",
+    "category": "food",
+    "aliases": []
+  },
+  {
+    "name": "Activia",
+    "parentCompany": "Danone",
+    "category": "food",
+    "aliases": []
+  },
+  {
+    "name": "Silk",
+    "parentCompany": "Danone",
+    "category": "beverage",
+    "aliases": [
+      "Silk Almondmilk"
+    ]
+  },
+  {
+    "name": "Chobani",
+    "parentCompany": "Chobani",
+    "category": "food",
+    "aliases": []
+  },
+  {
+    "name": "Beyond Meat",
+    "parentCompany": "Beyond Meat",
+    "category": "food",
+    "aliases": []
+  },
+  {
+    "name": "Similac",
+    "parentCompany": "Abbott Laboratories",
+    "category": "baby",
+    "aliases": []
+  },
+  {
+    "name": "Enfamil",
+    "parentCompany": "Reckitt",
+    "category": "baby",
+    "aliases": [
+      "Mead Johnson"
+    ]
+  },
+  {
+    "name": "Nature Made",
+    "parentCompany": "Pharmavite",
+    "category": "supplement",
+    "aliases": []
+  },
+  {
+    "name": "Centrum",
+    "parentCompany": "Haleon",
+    "category": "supplement",
+    "aliases": []
+  },
+  {
+    "name": "Emergen-C",
+    "parentCompany": "Haleon",
+    "category": "supplement",
+    "aliases": [
+      "Emergen C",
+      "EmergenC"
+    ]
+  },
+  {
+    "name": "Advil",
+    "parentCompany": "Haleon",
+    "category": "health",
+    "aliases": []
+  },
+  {
+    "name": "Tums",
+    "parentCompany": "Haleon",
+    "category": "health",
+    "aliases": []
+  },
+  {
+    "name": "Sensodyne",
+    "parentCompany": "Haleon",
+    "category": "personal_care",
+    "aliases": []
+  },
+  {
+    "name": "Tylenol",
+    "parentCompany": "Kenvue",
+    "category": "health",
+    "aliases": []
+  },
+  {
+    "name": "Neutrogena",
+    "parentCompany": "Kenvue",
+    "category": "personal_care",
+    "aliases": []
+  },
+  {
+    "name": "Listerine",
+    "parentCompany": "Kenvue",
+    "category": "personal_care",
+    "aliases": []
+  },
+  {
+    "name": "Band-Aid",
+    "parentCompany": "Kenvue",
+    "category": "health",
+    "aliases": [
+      "Band Aid",
+      "Bandaid"
+    ]
+  },
+  {
+    "name": "Aveeno",
+    "parentCompany": "Kenvue",
+    "category": "personal_care",
+    "aliases": []
+  },
+  {
+    "name": "Johnson's Baby",
+    "parentCompany": "Kenvue",
+    "category": "baby",
+    "aliases": [
+      "Johnsons Baby",
+      "Johnson's Baby Powder"
+    ]
+  },
+  {
+    "name": "Benadryl",
+    "parentCompany": "Kenvue",
+    "category": "health",
+    "aliases": []
+  },
+  {
+    "name": "Zyrtec",
+    "parentCompany": "Kenvue",
+    "category": "health",
+    "aliases": []
+  },
+  {
+    "name": "Claritin",
+    "parentCompany": "Bayer",
+    "category": "health",
+    "aliases": []
+  },
+  {
+    "name": "Aleve",
+    "parentCompany": "Bayer",
+    "category": "health",
+    "aliases": []
+  },
+  {
+    "name": "Airborne",
+    "parentCompany": "Reckitt",
+    "category": "supplement",
+    "aliases": []
+  },
+  {
+    "name": "Mucinex",
+    "parentCompany": "Reckitt",
+    "category": "health",
+    "aliases": []
+  },
+  {
+    "name": "Lysol",
+    "parentCompany": "Reckitt",
+    "category": "household",
+    "aliases": []
+  },
+  {
+    "name": "Vitafusion",
+    "parentCompany": "Church & Dwight",
+    "category": "supplement",
+    "aliases": []
+  },
+  {
+    "name": "Arm & Hammer",
+    "parentCompany": "Church & Dwight",
+    "category": "household",
+    "aliases": [
+      "Arm and Hammer"
+    ]
+  },
+  {
+    "name": "OxiClean",
+    "parentCompany": "Church & Dwight",
+    "category": "household",
+    "aliases": [
+      "Oxi Clean"
+    ]
+  },
+  {
+    "name": "Trojan",
+    "parentCompany": "Church & Dwight",
+    "category": "personal_care",
+    "aliases": []
+  },
+  {
+    "name": "Crest",
+    "parentCompany": "Procter & Gamble",
+    "category": "personal_care",
+    "aliases": [
+      "Crest Toothpaste",
+      "Crest 3D White"
+    ]
+  },
+  {
+    "name": "Oral-B",
+    "parentCompany": "Procter & Gamble",
+    "category": "personal_care",
+    "aliases": [
+      "Oral B"
+    ]
+  },
+  {
+    "name": "Tide",
+    "parentCompany": "Procter & Gamble",
+    "category": "household",
+    "aliases": [
+      "Tide Pods"
+    ]
+  },
+  {
+    "name": "Pampers",
+    "parentCompany": "Procter & Gamble",
+    "category": "baby",
+    "aliases": []
+  },
+  {
+    "name": "Gillette",
+    "parentCompany": "Procter & Gamble",
+    "category": "personal_care",
+    "aliases": []
+  },
+  {
+    "name": "Head & Shoulders",
+    "parentCompany": "Procter & Gamble",
+    "category": "personal_care",
+    "aliases": [
+      "Head and Shoulders"
+    ]
+  },
+  {
+    "name": "Pantene",
+    "parentCompany": "Procter & Gamble",
+    "category": "personal_care",
+    "aliases": []
+  },
+  {
+    "name": "Old Spice",
+    "parentCompany": "Procter & Gamble",
+    "category": "personal_care",
+    "aliases": []
+  },
+  {
+    "name": "Secret",
+    "parentCompany": "Procter & Gamble",
+    "category": "personal_care",
+    "aliases": [
+      "Secret Deodorant"
+    ]
+  },
+  {
+    "name": "Olay",
+    "parentCompany": "Procter & Gamble",
+    "category": "personal_care",
+    "aliases": []
+  },
+  {
+    "name": "Charmin",
+    "parentCompany": "Procter & Gamble",
+    "category": "household",
+    "aliases": []
+  },
+  {
+    "name": "Bounty",
+    "parentCompany": "Procter & Gamble",
+    "category": "household",
+    "aliases": [
+      "Bounty Paper Towels"
+    ]
+  },
+  {
+    "name": "Dawn",
+    "parentCompany": "Procter & Gamble",
+    "category": "household",
+    "aliases": [
+      "Dawn Dish Soap"
+    ]
+  },
+  {
+    "name": "Febreze",
+    "parentCompany": "Procter & Gamble",
+    "category": "household",
+    "aliases": []
+  },
+  {
+    "name": "Always",
+    "parentCompany": "Procter & Gamble",
+    "category": "personal_care",
+    "aliases": []
+  },
+  {
+    "name": "Vicks",
+    "parentCompany": "Procter & Gamble",
+    "category": "health",
+    "aliases": [
+      "NyQuil",
+      "DayQuil"
+    ]
+  },
+  {
+    "name": "Metamucil",
+    "parentCompany": "Procter & Gamble",
+    "category": "supplement",
+    "aliases": []
+  },
+  {
+    "name": "Colgate",
+    "parentCompany": "Colgate-Palmolive",
+    "category": "personal_care",
+    "aliases": [
+      "Colgate Toothpaste"
+    ]
+  },
+  {
+    "name": "Palmolive",
+    "parentCompany": "Colgate-Palmolive",
+    "category": "household",
+    "aliases": []
+  },
+  {
+    "name": "Tom's of Maine",
+    "parentCompany": "Colgate-Palmolive",
+    "category": "personal_care",
+    "aliases": [
+      "Toms of Maine"
+    ]
+  },
+  {
+    "name": "Hill's Pet Nutrition",
+    "parentCompany": "Colgate-Palmolive",
+    "category": "pet",
+    "aliases": [
+      "Hill's Science Diet",
+      "Science Diet"
+    ]
+  },
+  {
+    "name": "Dove",
+    "parentCompany": "Unilever",
+    "category": "personal_care",
+    "aliases": []
+  },
+  {
+    "name": "Axe",
+    "parentCompany": "Unilever",
+    "category": "personal_care",
+    "aliases": [
+      "Lynx"
+    ]
+  },
+  {
+    "name": "Degree",
+    "parentCompany": "Unilever",
+    "category": "personal_care",
+    "aliases": []
+  },
+  {
+    "name": "Vaseline",
+    "parentCompany": "Unilever",
+    "category": "personal_care",
+    "aliases": []
+  },
+  {
+    "name": "Hellmann's",
+    "parentCompany": "Unilever",
+    "category": "food",
+    "aliases": [
+      "Hellmanns",
+      "Best Foods"
+    ]
+  },
+  {
+    "name": "Olly",
+    "parentCompany": "Unilever",
+    "category": "supplement",
+    "aliases": [
+      "OLLY"
+    ]
+  },
+  {
+    "name": "CeraVe",
+    "parentCompany": "L'Oréal",
+    "category": "personal_care",
+    "aliases": [
+      "Cerave"
+    ]
+  },
+  {
+    "name": "La Roche-Posay",
+    "parentCompany": "L'Oréal",
+    "category": "personal_care",
+    "aliases": [
+      "La Roche Posay"
+    ]
+  },
+  {
+    "name": "Maybelline",
+    "parentCompany": "L'Oréal",
+    "category": "personal_care",
+    "aliases": [
+      "Maybelline New York"
+    ]
+  },
+  {
+    "name": "Garnier",
+    "parentCompany": "L'Oréal",
+    "category": "personal_care",
+    "aliases": []
+  },
+  {
+    "name": "L'Oréal Paris",
+    "parentCompany": "L'Oréal",
+    "category": "personal_care",
+    "aliases": [
+      "Loreal",
+      "L'Oreal"
+    ]
+  },
+  {
+    "name": "Estée Lauder",
+    "parentCompany": "The Estée Lauder Companies",
+    "category": "personal_care",
+    "aliases": [
+      "Estee Lauder"
+    ]
+  },
+  {
+    "name": "Clinique",
+    "parentCompany": "The Estée Lauder Companies",
+    "category": "personal_care",
+    "aliases": []
+  },
+  {
+    "name": "Kleenex",
+    "parentCompany": "Kimberly-Clark",
+    "category": "household",
+    "aliases": []
+  },
+  {
+    "name": "Huggies",
+    "parentCompany": "Kimberly-Clark",
+    "category": "baby",
+    "aliases": []
+  },
+  {
+    "name": "Cottonelle",
+    "parentCompany": "Kimberly-Clark",
+    "category": "household",
+    "aliases": []
+  },
+  {
+    "name": "Clorox",
+    "parentCompany": "The Clorox Company",
+    "category": "household",
+    "aliases": [
+      "Clorox Bleach"
+    ]
+  },
+  {
+    "name": "Glad",
+    "parentCompany": "The Clorox Company",
+    "category": "household",
+    "aliases": []
+  },
+  {
+    "name": "Burt's Bees",
+    "parentCompany": "The Clorox Company",
+    "category": "personal_care",
+    "aliases": [
+      "Burts Bees"
+    ]
+  },
+  {
+    "name": "Kingsford",
+    "parentCompany": "The Clorox Company",
+    "category": "household",
+    "aliases": []
+  },
+  {
+    "name": "Banana Boat",
+    "parentCompany": "Edgewell Personal Care",
+    "category": "personal_care",
+    "aliases": []
+  },
+  {
+    "name": "Schick",
+    "parentCompany": "Edgewell Personal Care",
+    "category": "personal_care",
+    "aliases": []
+  },
+  {
+    "name": "Coppertone",
+    "parentCompany": "Beiersdorf",
+    "category": "personal_care",
+    "aliases": []
+  },
+  {
+    "name": "Nivea",
+    "parentCompany": "Beiersdorf",
+    "category": "personal_care",
+    "aliases": []
+  },
+  {
+    "name": "Amazon",
+    "parentCompany": "Amazon.com, Inc.",
+    "category": "retail",
+    "aliases": [
+      "AMZN",
+      "Amazon.com",
+      "Amazon Mktp",
+      "AMZN Mktp US",
+      "Amazon Prime",
+      "Prime Video"
+    ]
+  },
+  {
+    "name": "Whole Foods Market",
+    "parentCompany": "Amazon.com, Inc.",
+    "category": "grocery",
+    "aliases": [
+      "Whole Foods",
+      "WFM"
+    ]
+  },
+  {
+    "name": "Ring",
+    "parentCompany": "Amazon.com, Inc.",
+    "category": "electronics",
+    "aliases": [
+      "Ring Doorbell"
+    ]
+  },
+  {
+    "name": "Audible",
+    "parentCompany": "Amazon.com, Inc.",
+    "category": "subscription",
+    "aliases": []
+  },
+  {
+    "name": "Walmart",
+    "parentCompany": "Walmart Inc.",
+    "category": "retail",
+    "aliases": [
+      "Wal-Mart",
+      "Walmart.com",
+      "WM Supercenter",
+      "Wal-Mart Supercenter"
+    ]
+  },
+  {
+    "name": "Sam's Club",
+    "parentCompany": "Walmart Inc.",
+    "category": "retail",
+    "aliases": [
+      "Sams Club"
+    ]
+  },
+  {
+    "name": "Target",
+    "parentCompany": "Target Corporation",
+    "category": "retail",
+    "aliases": [
+      "Target.com"
+    ]
+  },
+  {
+    "name": "Costco",
+    "parentCompany": "Costco Wholesale Corporation",
+    "category": "retail",
+    "aliases": [
+      "Costco Whse",
+      "Kirkland Signature"
+    ]
+  },
+  {
+    "name": "Kroger",
+    "parentCompany": "The Kroger Co.",
+    "category": "grocery",
+    "aliases": []
+  },
+  {
+    "name": "The Home Depot",
+    "parentCompany": "The Home Depot, Inc.",
+    "category": "retail",
+    "aliases": [
+      "Home Depot"
+    ]
+  },
+  {
+    "name": "Lowe's",
+    "parentCompany": "Lowe's Companies, Inc.",
+    "category": "retail",
+    "aliases": [
+      "Lowes"
+    ]
+  },
+  {
+    "name": "Best Buy",
+    "parentCompany": "Best Buy Co., Inc.",
+    "category": "retail",
+    "aliases": []
+  },
+  {
+    "name": "CVS Pharmacy",
+    "parentCompany": "CVS Health",
+    "category": "pharmacy",
+    "aliases": [
+      "CVS",
+      "CVS/Pharmacy"
+    ]
+  },
+  {
+    "name": "Aetna",
+    "parentCompany": "CVS Health",
+    "category": "insurance",
+    "aliases": []
+  },
+  {
+    "name": "Walgreens",
+    "parentCompany": "Walgreens Boots Alliance",
+    "category": "pharmacy",
+    "aliases": []
+  },
+  {
+    "name": "Dollar General",
+    "parentCompany": "Dollar General Corporation",
+    "category": "retail",
+    "aliases": []
+  },
+  {
+    "name": "Dollar Tree",
+    "parentCompany": "Dollar Tree, Inc.",
+    "category": "retail",
+    "aliases": []
+  },
+  {
+    "name": "Macy's",
+    "parentCompany": "Macy's, Inc.",
+    "category": "retail",
+    "aliases": [
+      "Macys"
+    ]
+  },
+  {
+    "name": "Gap",
+    "parentCompany": "Gap Inc.",
+    "category": "apparel",
+    "aliases": []
+  },
+  {
+    "name": "Old Navy",
+    "parentCompany": "Gap Inc.",
+    "category": "apparel",
+    "aliases": []
+  },
+  {
+    "name": "Nike",
+    "parentCompany": "Nike, Inc.",
+    "category": "apparel",
+    "aliases": []
+  },
+  {
+    "name": "Lululemon",
+    "parentCompany": "Lululemon Athletica",
+    "category": "apparel",
+    "aliases": [
+      "lululemon athletica"
+    ]
+  },
+  {
+    "name": "Trader Joe's",
+    "parentCompany": "Trader Joe's",
+    "category": "grocery",
+    "aliases": [
+      "Trader Joes"
+    ]
+  },
+  {
+    "name": "Instacart",
+    "parentCompany": "Maplebear Inc.",
+    "category": "delivery",
+    "aliases": []
+  },
+  {
+    "name": "eBay",
+    "parentCompany": "eBay Inc.",
+    "category": "retail",
+    "aliases": []
+  },
+  {
+    "name": "Etsy",
+    "parentCompany": "Etsy, Inc.",
+    "category": "retail",
+    "aliases": []
+  },
+  {
+    "name": "Wayfair",
+    "parentCompany": "Wayfair Inc.",
+    "category": "retail",
+    "aliases": []
+  },
+  {
+    "name": "Temu",
+    "parentCompany": "PDD Holdings",
+    "category": "retail",
+    "aliases": []
+  },
+  {
+    "name": "Apple",
+    "parentCompany": "Apple Inc.",
+    "category": "electronics",
+    "aliases": [
+      "APPLE.COM/BILL",
+      "iTunes",
+      "iCloud",
+      "App Store",
+      "iPhone",
+      "AirPods"
+    ]
+  },
+  {
+    "name": "Google",
+    "parentCompany": "Alphabet Inc.",
+    "category": "technology",
+    "aliases": [
+      "Google Play",
+      "GOOGLE",
+      "Pixel",
+      "Nest"
+    ]
+  },
+  {
+    "name": "YouTube",
+    "parentCompany": "Alphabet Inc.",
+    "category": "streaming",
+    "aliases": [
+      "YouTube TV",
+      "YouTube Premium"
+    ]
+  },
+  {
+    "name": "Microsoft",
+    "parentCompany": "Microsoft Corporation",
+    "category": "technology",
+    "aliases": [
+      "MSFT",
+      "Microsoft 365"
+    ]
+  },
+  {
+    "name": "Xbox",
+    "parentCompany": "Microsoft Corporation",
+    "category": "gaming",
+    "aliases": [
+      "Xbox Game Pass"
+    ]
+  },
+  {
+    "name": "LinkedIn",
+    "parentCompany": "Microsoft Corporation",
+    "category": "technology",
+    "aliases": []
+  },
+  {
+    "name": "Facebook",
+    "parentCompany": "Meta Platforms",
+    "category": "technology",
+    "aliases": [
+      "FB",
+      "Meta"
+    ]
+  },
+  {
+    "name": "Instagram",
+    "parentCompany": "Meta Platforms",
+    "category": "technology",
+    "aliases": []
+  },
+  {
+    "name": "WhatsApp",
+    "parentCompany": "Meta Platforms",
+    "category": "technology",
+    "aliases": []
+  },
+  {
+    "name": "Samsung",
+    "parentCompany": "Samsung Electronics",
+    "category": "electronics",
+    "aliases": [
+      "Samsung Galaxy"
+    ]
+  },
+  {
+    "name": "PlayStation",
+    "parentCompany": "Sony Group Corporation",
+    "category": "gaming",
+    "aliases": [
+      "PlayStation Network",
+      "PSN"
+    ]
+  },
+  {
+    "name": "Nintendo",
+    "parentCompany": "Nintendo Co., Ltd.",
+    "category": "gaming",
+    "aliases": []
+  },
+  {
+    "name": "HP",
+    "parentCompany": "HP Inc.",
+    "category": "electronics",
+    "aliases": [
+      "Hewlett-Packard",
+      "HP Instant Ink"
+    ]
+  },
+  {
+    "name": "Dell",
+    "parentCompany": "Dell Technologies",
+    "category": "electronics",
+    "aliases": []
+  },
+  {
+    "name": "Adobe",
+    "parentCompany": "Adobe Inc.",
+    "category": "software",
+    "aliases": [
+      "Adobe Creative Cloud"
+    ]
+  },
+  {
+    "name": "Snapchat",
+    "parentCompany": "Snap Inc.",
+    "category": "technology",
+    "aliases": [
+      "Snap"
+    ]
+  },
+  {
+    "name": "Roku",
+    "parentCompany": "Roku, Inc.",
+    "category": "streaming",
+    "aliases": []
+  },
+  {
+    "name": "Verizon",
+    "parentCompany": "Verizon Communications",
+    "category": "telecom",
+    "aliases": [
+      "Verizon Wireless",
+      "VZWRLSS",
+      "Fios",
+      "Verizon Fios"
+    ]
+  },
+  {
+    "name": "AT&T",
+    "parentCompany": "AT&T Inc.",
+    "category": "telecom",
+    "aliases": [
+      "ATT",
+      "AT and T"
+    ]
+  },
+  {
+    "name": "Cricket Wireless",
+    "parentCompany": "AT&T Inc.",
+    "category": "telecom",
+    "aliases": [
+      "Cricket"
+    ]
+  },
+  {
+    "name": "T-Mobile",
+    "parentCompany": "T-Mobile US",
+    "category": "telecom",
+    "aliases": [
+      "TMobile",
+      "T Mobile",
+      "TMOBILE"
+    ]
+  },
+  {
+    "name": "Metro by T-Mobile",
+    "parentCompany": "T-Mobile US",
+    "category": "telecom",
+    "aliases": [
+      "MetroPCS",
+      "Metro PCS"
+    ]
+  },
+  {
+    "name": "Mint Mobile",
+    "parentCompany": "T-Mobile US",
+    "category": "telecom",
+    "aliases": []
+  },
+  {
+    "name": "Xfinity",
+    "parentCompany": "Comcast Corporation",
+    "category": "telecom",
+    "aliases": [
+      "Comcast",
+      "Comcast Xfinity"
+    ]
+  },
+  {
+    "name": "Peacock",
+    "parentCompany": "Comcast Corporation",
+    "category": "streaming",
+    "aliases": []
+  },
+  {
+    "name": "Spectrum",
+    "parentCompany": "Charter Communications",
+    "category": "telecom",
+    "aliases": [
+      "Charter Spectrum"
+    ]
+  },
+  {
+    "name": "Cox",
+    "parentCompany": "Cox Communications",
+    "category": "telecom",
+    "aliases": [
+      "Cox Communications"
+    ]
+  },
+  {
+    "name": "Optimum",
+    "parentCompany": "Altice USA",
+    "category": "telecom",
+    "aliases": []
+  },
+  {
+    "name": "DirecTV",
+    "parentCompany": "DirecTV",
+    "category": "telecom",
+    "aliases": [
+      "DIRECTV"
+    ]
+  },
+  {
+    "name": "Dish",
+    "parentCompany": "EchoStar Corporation",
+    "category": "telecom",
+    "aliases": [
+      "Dish Network"
+    ]
+  },
+  {
+    "name": "Boost Mobile",
+    "parentCompany": "EchoStar Corporation",
+    "category": "telecom",
+    "aliases": []
+  },
+  {
+    "name": "Netflix",
+    "parentCompany": "Netflix, Inc.",
+    "category": "streaming",
+    "aliases": [
+      "NETFLIX.COM"
+    ]
+  },
+  {
+    "name": "Spotify",
+    "parentCompany": "Spotify Technology S.A.",
+    "category": "streaming",
+    "aliases": [
+      "Spotify USA"
+    ]
+  },
+  {
+    "name": "Hulu",
+    "parentCompany": "The Walt Disney Company",
+    "category": "streaming",
+    "aliases": []
+  },
+  {
+    "name": "Disney+",
+    "parentCompany": "The Walt Disney Company",
+    "category": "streaming",
+    "aliases": [
+      "Disney Plus"
+    ]
+  },
+  {
+    "name": "ESPN",
+    "parentCompany": "The Walt Disney Company",
+    "category": "streaming",
+    "aliases": [
+      "ESPN+"
+    ]
+  },
+  {
+    "name": "HBO Max",
+    "parentCompany": "Warner Bros. Discovery",
+    "category": "streaming",
+    "aliases": [
+      "HBO"
+    ]
+  },
+  {
+    "name": "Paramount+",
+    "parentCompany": "Paramount Skydance",
+    "category": "streaming",
+    "aliases": [
+      "Paramount Plus"
+    ]
+  },
+  {
+    "name": "SiriusXM",
+    "parentCompany": "Sirius XM Holdings",
+    "category": "streaming",
+    "aliases": [
+      "Sirius XM",
+      "Sirius"
+    ]
+  },
+  {
+    "name": "Peloton",
+    "parentCompany": "Peloton Interactive",
+    "category": "fitness",
+    "aliases": [
+      "Peloton Interactive"
+    ]
+  },
+  {
+    "name": "Planet Fitness",
+    "parentCompany": "Planet Fitness, Inc.",
+    "category": "fitness",
+    "aliases": []
+  },
+  {
+    "name": "Tinder",
+    "parentCompany": "Match Group",
+    "category": "dating",
+    "aliases": []
+  },
+  {
+    "name": "Hinge",
+    "parentCompany": "Match Group",
+    "category": "dating",
+    "aliases": []
+  },
+  {
+    "name": "Match",
+    "parentCompany": "Match Group",
+    "category": "dating",
+    "aliases": [
+      "Match.com"
+    ]
+  },
+  {
+    "name": "Bumble",
+    "parentCompany": "Bumble Inc.",
+    "category": "dating",
+    "aliases": []
+  },
+  {
+    "name": "Uber",
+    "parentCompany": "Uber Technologies",
+    "category": "rideshare",
+    "aliases": [
+      "Uber Eats",
+      "UBER TRIP",
+      "Uber One"
+    ]
+  },
+  {
+    "name": "Lyft",
+    "parentCompany": "Lyft, Inc.",
+    "category": "rideshare",
+    "aliases": []
+  },
+  {
+    "name": "DoorDash",
+    "parentCompany": "DoorDash, Inc.",
+    "category": "delivery",
+    "aliases": [
+      "DD DoorDash",
+      "DashPass"
+    ]
+  },
+  {
+    "name": "Grubhub",
+    "parentCompany": "Wonder Group",
+    "category": "delivery",
+    "aliases": []
+  },
+  {
+    "name": "Airbnb",
+    "parentCompany": "Airbnb, Inc.",
+    "category": "travel",
+    "aliases": []
+  },
+  {
+    "name": "Booking.com",
+    "parentCompany": "Booking Holdings",
+    "category": "travel",
+    "aliases": []
+  },
+  {
+    "name": "Priceline",
+    "parentCompany": "Booking Holdings",
+    "category": "travel",
+    "aliases": []
+  },
+  {
+    "name": "Expedia",
+    "parentCompany": "Expedia Group",
+    "category": "travel",
+    "aliases": []
+  },
+  {
+    "name": "Hotels.com",
+    "parentCompany": "Expedia Group",
+    "category": "travel",
+    "aliases": []
+  },
+  {
+    "name": "Vrbo",
+    "parentCompany": "Expedia Group",
+    "category": "travel",
+    "aliases": []
+  },
+  {
+    "name": "Marriott",
+    "parentCompany": "Marriott International",
+    "category": "travel",
+    "aliases": [
+      "Marriott Bonvoy"
+    ]
+  },
+  {
+    "name": "Hilton",
+    "parentCompany": "Hilton Worldwide",
+    "category": "travel",
+    "aliases": [
+      "Hilton Honors"
+    ]
+  },
+  {
+    "name": "American Airlines",
+    "parentCompany": "American Airlines Group",
+    "category": "airline",
+    "aliases": [
+      "AAdvantage"
+    ]
+  },
+  {
+    "name": "Delta Air Lines",
+    "parentCompany": "Delta Air Lines, Inc.",
+    "category": "airline",
+    "aliases": [
+      "Delta"
+    ]
+  },
+  {
+    "name": "United Airlines",
+    "parentCompany": "United Airlines Holdings",
+    "category": "airline",
+    "aliases": [
+      "United"
+    ]
+  },
+  {
+    "name": "Southwest Airlines",
+    "parentCompany": "Southwest Airlines Co.",
+    "category": "airline",
+    "aliases": [
+      "Southwest"
+    ]
+  },
+  {
+    "name": "JetBlue",
+    "parentCompany": "JetBlue Airways",
+    "category": "airline",
+    "aliases": [
+      "JetBlue Airways"
+    ]
+  },
+  {
+    "name": "Alaska Airlines",
+    "parentCompany": "Alaska Air Group",
+    "category": "airline",
+    "aliases": []
+  },
+  {
+    "name": "Hawaiian Airlines",
+    "parentCompany": "Alaska Air Group",
+    "category": "airline",
+    "aliases": []
+  },
+  {
+    "name": "Spirit Airlines",
+    "parentCompany": "Spirit Aviation Holdings",
+    "category": "airline",
+    "aliases": [
+      "Spirit"
+    ]
+  },
+  {
+    "name": "Frontier Airlines",
+    "parentCompany": "Frontier Group Holdings",
+    "category": "airline",
+    "aliases": []
+  },
+  {
+    "name": "Chase",
+    "parentCompany": "JPMorgan Chase & Co.",
+    "category": "bank",
+    "aliases": [
+      "JPMorgan Chase",
+      "Chase Bank",
+      "JPMorgan"
+    ]
+  },
+  {
+    "name": "Bank of America",
+    "parentCompany": "Bank of America Corporation",
+    "category": "bank",
+    "aliases": [
+      "BofA",
+      "BOA"
+    ]
+  },
+  {
+    "name": "Wells Fargo",
+    "parentCompany": "Wells Fargo & Company",
+    "category": "bank",
+    "aliases": []
+  },
+  {
+    "name": "Citi",
+    "parentCompany": "Citigroup",
+    "category": "bank",
+    "aliases": [
+      "Citibank"
+    ]
+  },
+  {
+    "name": "Capital One",
+    "parentCompany": "Capital One Financial",
+    "category": "bank",
+    "aliases": []
+  },
+  {
+    "name": "Discover",
+    "parentCompany": "Capital One Financial",
+    "category": "bank",
+    "aliases": [
+      "Discover Card",
+      "Discover Financial"
+    ]
+  },
+  {
+    "name": "U.S. Bank",
+    "parentCompany": "U.S. Bancorp",
+    "category": "bank",
+    "aliases": [
+      "US Bank"
+    ]
+  },
+  {
+    "name": "PNC",
+    "parentCompany": "PNC Financial Services Group",
+    "category": "bank",
+    "aliases": [
+      "PNC Bank"
+    ]
+  },
+  {
+    "name": "Truist",
+    "parentCompany": "Truist Financial",
+    "category": "bank",
+    "aliases": []
+  },
+  {
+    "name": "TD Bank",
+    "parentCompany": "TD Bank Group",
+    "category": "bank",
+    "aliases": []
+  },
+  {
+    "name": "Ally",
+    "parentCompany": "Ally Financial",
+    "category": "bank",
+    "aliases": [
+      "Ally Bank"
+    ]
+  },
+  {
+    "name": "American Express",
+    "parentCompany": "American Express Company",
+    "category": "bank",
+    "aliases": [
+      "Amex"
+    ]
+  },
+  {
+    "name": "Synchrony",
+    "parentCompany": "Synchrony Financial",
+    "category": "bank",
+    "aliases": [
+      "Synchrony Bank"
+    ]
+  },
+  {
+    "name": "Navy Federal Credit Union",
+    "parentCompany": "Navy Federal Credit Union",
+    "category": "bank",
+    "aliases": [
+      "Navy Federal"
+    ]
+  },
+  {
+    "name": "PayPal",
+    "parentCompany": "PayPal Holdings",
+    "category": "fintech",
+    "aliases": []
+  },
+  {
+    "name": "Venmo",
+    "parentCompany": "PayPal Holdings",
+    "category": "fintech",
+    "aliases": []
+  },
+  {
+    "name": "Cash App",
+    "parentCompany": "Block, Inc.",
+    "category": "fintech",
+    "aliases": [
+      "Square Cash"
+    ]
+  },
+  {
+    "name": "Zelle",
+    "parentCompany": "Early Warning Services",
+    "category": "fintech",
+    "aliases": []
+  },
+  {
+    "name": "Robinhood",
+    "parentCompany": "Robinhood Markets",
+    "category": "fintech",
+    "aliases": []
+  },
+  {
+    "name": "Chime",
+    "parentCompany": "Chime Financial",
+    "category": "fintech",
+    "aliases": []
+  },
+  {
+    "name": "Coinbase",
+    "parentCompany": "Coinbase Global",
+    "category": "fintech",
+    "aliases": []
+  },
+  {
+    "name": "Equifax",
+    "parentCompany": "Equifax Inc.",
+    "category": "credit_bureau",
+    "aliases": []
+  },
+  {
+    "name": "Experian",
+    "parentCompany": "Experian plc",
+    "category": "credit_bureau",
+    "aliases": []
+  },
+  {
+    "name": "TransUnion",
+    "parentCompany": "TransUnion",
+    "category": "credit_bureau",
+    "aliases": []
+  },
+  {
+    "name": "GEICO",
+    "parentCompany": "Berkshire Hathaway",
+    "category": "insurance",
+    "aliases": []
+  },
+  {
+    "name": "State Farm",
+    "parentCompany": "State Farm",
+    "category": "insurance",
+    "aliases": []
+  },
+  {
+    "name": "Progressive",
+    "parentCompany": "The Progressive Corporation",
+    "category": "insurance",
+    "aliases": []
+  },
+  {
+    "name": "Allstate",
+    "parentCompany": "The Allstate Corporation",
+    "category": "insurance",
+    "aliases": []
+  },
+  {
+    "name": "Tesla",
+    "parentCompany": "Tesla, Inc.",
+    "category": "auto",
+    "aliases": []
+  },
+  {
+    "name": "Ford",
+    "parentCompany": "Ford Motor Company",
+    "category": "auto",
+    "aliases": []
+  },
+  {
+    "name": "Chevrolet",
+    "parentCompany": "General Motors",
+    "category": "auto",
+    "aliases": [
+      "Chevy"
+    ]
+  },
+  {
+    "name": "Toyota",
+    "parentCompany": "Toyota Motor Corporation",
+    "category": "auto",
+    "aliases": []
+  },
+  {
+    "name": "Honda",
+    "parentCompany": "Honda Motor Co.",
+    "category": "auto",
+    "aliases": []
+  },
+  {
+    "name": "Hyundai",
+    "parentCompany": "Hyundai Motor Company",
+    "category": "auto",
+    "aliases": []
+  },
+  {
+    "name": "Kia",
+    "parentCompany": "Kia Corporation",
+    "category": "auto",
+    "aliases": []
+  },
+  {
+    "name": "McDonald's",
+    "parentCompany": "McDonald's Corporation",
+    "category": "restaurant",
+    "aliases": [
+      "McDonalds"
+    ]
+  },
+  {
+    "name": "Starbucks",
+    "parentCompany": "Starbucks Corporation",
+    "category": "restaurant",
+    "aliases": []
+  },
+  {
+    "name": "Chipotle",
+    "parentCompany": "Chipotle Mexican Grill",
+    "category": "restaurant",
+    "aliases": []
+  },
+  {
+    "name": "Subway",
+    "parentCompany": "Subway",
+    "category": "restaurant",
+    "aliases": []
+  },
+  {
+    "name": "Taco Bell",
+    "parentCompany": "Yum! Brands",
+    "category": "restaurant",
+    "aliases": []
+  },
+  {
+    "name": "KFC",
+    "parentCompany": "Yum! Brands",
+    "category": "restaurant",
+    "aliases": [
+      "Kentucky Fried Chicken"
+    ]
+  },
+  {
+    "name": "Pizza Hut",
+    "parentCompany": "Yum! Brands",
+    "category": "restaurant",
+    "aliases": []
+  },
+  {
+    "name": "Burger King",
+    "parentCompany": "Restaurant Brands International",
+    "category": "restaurant",
+    "aliases": []
+  },
+  {
+    "name": "Domino's",
+    "parentCompany": "Domino's Pizza, Inc.",
+    "category": "restaurant",
+    "aliases": [
+      "Dominos"
+    ]
+  },
+  {
+    "name": "Wendy's",
+    "parentCompany": "The Wendy's Company",
+    "category": "restaurant",
+    "aliases": [
+      "Wendys"
+    ]
+  },
+  {
+    "name": "Dunkin'",
+    "parentCompany": "Inspire Brands",
+    "category": "restaurant",
+    "aliases": [
+      "Dunkin",
+      "Dunkin Donuts"
+    ]
+  },
+  {
+    "name": "Chick-fil-A",
+    "parentCompany": "Chick-fil-A, Inc.",
+    "category": "restaurant",
+    "aliases": [
+      "Chick fil A"
+    ]
+  }
+]

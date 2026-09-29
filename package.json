@@ -6,10 +6,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:seed": "tsx scripts/seed-brands.ts && tsx scripts/seed-sample.ts",
+    "ingest": "tsx scripts/ingest-courtlistener.ts",
+    "enrich": "tsx scripts/enrich.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.129.0",
+    "motion": "^13.4.4",
     "next": "16.3.6",
     "plaid": "^47.0.0",
     "react": "19.2.8",

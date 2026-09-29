@@ -20,6 +20,14 @@ export const CASE_STATUSES: CaseStatus[] = [
   "unknown",
 ];
 
+// Statuses that count as "active" for My Items matching (closed/dismissed excluded).
+export const ACTIVE_STATUSES: CaseStatus[] = [
+  "filed",
+  "certified",
+  "settlement_pending",
+  "claims_open",
+];
+
 export interface CaseSummary {
   id: string;
   caseName: string;
@@ -63,7 +71,22 @@ export interface Brand {
   category: string | null;
 }
 
-export type DetectionSource = "photo" | "text" | "bank" | "receipt";
+// "manual" = an item the user typed into their My Items list (confidence 1).
+export type DetectionSource = "photo" | "text" | "bank" | "receipt" | "manual";
+
+// One entry in the user's My Items list. Stored on the device only (localStorage on
+// web, AsyncStorage on iPhone); never sent to the server except inside a match request.
+export interface OwnedItem {
+  id: string;
+  label: string; // what the user typed, e.g. "Crest toothpaste"
+  brand?: string; // brand the user confirmed, if different from label
+  addedAt: string; // ISO datetime
+}
+
+export interface MatchRequest {
+  detections: BrandDetection[];
+  activeOnly?: boolean; // only return cases in ACTIVE_STATUSES
+}
 
 export interface BrandDetection {
   brand: string; // as detected, e.g. "Coke", "AMZN Mktp"
