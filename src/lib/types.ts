@@ -100,6 +100,14 @@ export interface BrandMatch {
   brand: Brand;
   detections: BrandDetection[];
   cases: CaseSummary[];
+  /** How this brand relates to what the user owns (set by /api/match). */
+  relation?: "direct" | "parent" | "subsidiary";
+  /** Detected brands that led to a parent/subsidiary match. */
+  via?: string[];
+  /** Parent matches: case id -> the user's brand named in that case's filings. */
+  mentions?: Record<string, string>;
+  /** Parent matches: the parent's lawsuits whose filings don't name the user's brand. */
+  unverifiedCount?: number;
 }
 
 export interface CaseSearchParams {

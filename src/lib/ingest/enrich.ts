@@ -3,6 +3,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import { z } from "zod";
+import { stripCorporateSuffix } from "@/lib/brands/normalize";
 import { normalizeBrandKey, upsertBrand } from "@/lib/repo/brands";
 import {
   deleteCase,
@@ -147,12 +148,12 @@ const US_STATES = new Set(
 );
 
 /** Persist an enrichment: case fields, then brand links (reusing dictionary brands by name/alias). */
-export function applyEnrichment(c: EnrichmentCandidate, e: Enrichment): string[] {
+export async function applyEnrichment(c: EnrichmentCandidate, e: Enrichment): Promise<string[]> {
   const states = [
     ...new Set(e.states.map((s) => s.trim().toUpperCase()).filter((s) => US_STATES.has(s))),
   ];
   const canUpdateStatus = c.status === "filed" || c.status === "unknown";
-  updateCaseFields(c.id, {
+  await updateCaseFields(c.id, {
     summary: e.summary.trim() || null,
     whoQualifies: e.who_qualifies?.trim() || null,
     categories: e.categories.map((s) => s.trim().toLowerCase()).filter(Boolean).slice(0, 6),
@@ -160,24 +161,44 @@ export function applyEnrichment(c: EnrichmentCandidate, e: Enrichment): string[]
     settlementAmount: e.settlement_amount?.trim() || null,
     ...(canUpdateStatus ? { status: e.status_guess as CaseStatus } : {}),
     lastChecked: new Date().toISOString(),
+    enrichedAt: new Date().toISOString(),
   });
 
   const linked: string[] = [];
   for (const d of e.defendants) {
+    // Link the defendant company too, so owners of any of its brands (Ring for a suit
+    // against Amazon.com, Inc.) find the case by climbing to the parent.
+    const company = d.company.trim();
+    const companyNormalized = normalizeBrandKey(company);
+    if (companyNormalized) {
+      const stripped = stripCorporateSuffix(company);
+      const entity =
+        (await findBrandByNameOrAlias(company, companyNormalized)) ??
+        (await findBrandByNameOrAlias(stripped, normalizeBrandKey(stripped))) ??
+        (await upsertBrand({
+          name: company,
+          normalized: companyNormalized,
+          parentCompany: null,
+          aliases: [],
+          category: "company",
+        }));
+      await linkCaseBrand(c.id, entity.id, "defendant", []);
+      linked.push(entity.name);
+    }
     for (const b of d.brands) {
       const name = b.name.trim();
       const normalized = normalizeBrandKey(name);
       if (!normalized) continue;
       const brand =
-        findBrandByNameOrAlias(name, normalized) ??
-        upsertBrand({
+        (await findBrandByNameOrAlias(name, normalized)) ??
+        (await upsertBrand({
           name,
           normalized,
           parentCompany: d.company.trim() || null,
           aliases: [],
           category: e.categories[0] ?? null,
-        });
-      linkCaseBrand(c.id, brand.id, "defendant", b.products);
+        }));
+      await linkCaseBrand(c.id, brand.id, "defendant", b.products);
       linked.push(brand.name);
     }
   }
@@ -206,19 +227,19 @@ export async function enrichPending(opts: EnrichOptions) {
     return stats;
   }
   const client = new Anthropic();
-  const candidates = listCasesForEnrichment({ limit: opts.limit, force: opts.force, ids: opts.ids });
+  const candidates = await listCasesForEnrichment({ limit: opts.limit, force: opts.force, ids: opts.ids });
   log(`Enriching ${candidates.length} case(s) with ${ENRICH_MODEL}`);
 
   for (const c of candidates) {
     try {
       const e = await extractEnrichment(client, c, { includePdf: opts.includePdf ?? true });
       if (!e.is_class_action && opts.prune) {
-        deleteCase(c.id);
+        await deleteCase(c.id);
         stats.pruned++;
         log(`  ${c.id} pruned (not a class action): ${c.caseName}`);
         continue;
       }
-      const brands = applyEnrichment(c, e);
+      const brands = await applyEnrichment(c, e);
       stats.enriched++;
       log(
         `  ${c.id} ${e.is_class_action ? "" : "[not class action?] "}${e.status_guess} | brands: ${brands.join(", ") || "-"} | ${c.caseName}`,

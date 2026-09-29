@@ -25,10 +25,21 @@ export interface BrandIndex {
 const INDEX_TTL_MS = 30_000;
 let cached: { index: BrandIndex; at: number } | null = null;
 
-export function getBrandIndex(): BrandIndex {
-  const now = Date.now();
-  if (!cached || now - cached.at > INDEX_TTL_MS) cached = { index: buildBrandIndex(listBrands()), at: now };
-  return cached.index;
+let inflight: Promise<BrandIndex> | null = null;
+
+export async function getBrandIndex(): Promise<BrandIndex> {
+  if (cached && Date.now() - cached.at <= INDEX_TTL_MS) return cached.index;
+  // One rebuild at a time; concurrent requests share it.
+  inflight ??= listBrands()
+    .then((brands) => {
+      const index = buildBrandIndex(brands);
+      cached = { index, at: Date.now() };
+      return index;
+    })
+    .finally(() => {
+      inflight = null;
+    });
+  return inflight;
 }
 
 export function invalidateBrandIndex(): void {
@@ -84,30 +95,41 @@ export function buildBrandIndex(brands: Brand[]): BrandIndex {
   return { brands, byId, byKey, byCompact, childrenByCompany, brandsByCompany, maxKeyTokens };
 }
 
-/** Brand entities that represent `brand.parentCompany` (e.g. Dasani -> The Coca-Cola Company). */
+/**
+ * Brands that stand for `brand.parentCompany`: the company entity itself (e.g. "Amazon.com, Inc.")
+ * plus the company's namesake brand ("Amazon" for Ring, "Coca-Cola" for Dasani). Lawsuits against
+ * the parent are often linked to the namesake brand, so both are climbed so none are missed.
+ */
 export function parentBrandsOf(index: BrandIndex, brand: Brand): Brand[] {
   if (!brand.parentCompany) return [];
-  const exact = index.byKey.get(normalizeBrandKey(brand.parentCompany)) ?? [];
-  const exactBrands = exact.filter((e) => e.kind === "exact").map((e) => e.brand);
-  if (exactBrands.length) return exactBrands.filter((b) => b.id !== brand.id);
-  // Fuzzy company match ("Coca-Cola" for "The Coca-Cola Company"), but never a sibling:
-  // a product brand that itself sits under the same parent (Coke soda for Dasani).
-  const parentKey = companyKey(brand.parentCompany);
-  return (index.brandsByCompany.get(parentKey) ?? []).filter(
-    (b) => b.id !== brand.id && !(b.parentCompany && companyKey(b.parentCompany) === parentKey && isProductBrand(b)),
-  );
+  const out = new Map<string, Brand>();
+  for (const e of index.byKey.get(normalizeBrandKey(brand.parentCompany)) ?? []) {
+    if (e.kind === "exact") out.set(e.brand.id, e.brand);
+  }
+  for (const b of index.brandsByCompany.get(companyKey(brand.parentCompany)) ?? []) out.set(b.id, b);
+  out.delete(brand.id);
+  return [...out.values()];
 }
 
-/** A brand named after its own parent company is the product line, not the company entity. */
-function isProductBrand(b: Brand): boolean {
-  return Boolean(b.parentCompany) && normalizeBrandKey(b.parentCompany!) !== normalizeBrandKey(b.name);
+/**
+ * A product line named after its own parent ("Coca-Cola" soda under "The Coca-Cola Company",
+ * "Amazon" under "Amazon.com, Inc."), as opposed to the company entity.
+ */
+function isNamesakeProduct(b: Brand): boolean {
+  if (!b.parentCompany) return false;
+  if (normalizeBrandKey(b.parentCompany) === normalizeBrandKey(b.name)) return false;
+  const parentKey = companyKey(b.parentCompany);
+  return companyKey(b.name) === parentKey || b.aliases.some((a) => companyKey(a) === parentKey);
 }
 
-/** Brands whose parent_company is this brand (e.g. The Coca-Cola Company -> Dasani). */
+/**
+ * Brands whose parent_company is this brand (e.g. The Coca-Cola Company -> Dasani,
+ * Nestlé -> Nestlé Health Science). Call again on the results to walk further down.
+ */
 export function childBrandsOf(index: BrandIndex, brand: Brand): Brand[] {
-  // "Coca-Cola" soda whose parent is "The Coca-Cola Company" is a product line, not the
-  // company: expanding it downward would surface siblings (Dasani for a Coke drinker).
-  if (isProductBrand(brand)) return [];
+  // "Coca-Cola" soda is a product line, not the company: expanding it downward would
+  // surface siblings (Dasani for a Coke drinker).
+  if (isNamesakeProduct(brand)) return [];
   const keys = new Set([companyKey(brand.name), companyKey(brand.normalized)]);
   const out = new Map<string, Brand>();
   for (const k of keys) for (const child of index.childrenByCompany.get(k) ?? []) {

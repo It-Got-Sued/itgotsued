@@ -11,6 +11,7 @@
 //   --prune       delete cases the model judges are not class actions
 import { parseArgs } from "./_env";
 import { enrichPending } from "@/lib/ingest/enrich";
+import { closePool } from "@/lib/db";
 
 const args = parseArgs();
 
@@ -28,5 +29,6 @@ enrichPending({
   )
   .catch((err) => {
     console.error(err instanceof Error ? err.message : err);
-    process.exit(1);
-  });
+    process.exitCode = 1;
+  })
+  .finally(closePool);

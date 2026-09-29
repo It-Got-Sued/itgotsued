@@ -31,7 +31,7 @@ export async function POST(request: Request) {
   if (!parsed.success) return badRequest("Invalid request.", z.flattenError(parsed.error));
 
   try {
-    const matches = matchDetections(parsed.data.detections, { activeOnly: parsed.data.activeOnly });
+    const matches = await matchDetections(parsed.data.detections, { activeOnly: parsed.data.activeOnly });
     return Response.json({ matches }, { headers: { "Cache-Control": "no-store" } });
   } catch (err) {
     return errorResponse(err);

@@ -23,11 +23,11 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
-  const brand = getBrandByNormalized(normalizeBrandKey(parsed.data.brand));
+  const brand = await getBrandByNormalized(normalizeBrandKey(parsed.data.brand));
   if (!brand) return Response.json({ error: "Unknown brand." }, { status: 404 });
 
   try {
-    addToWatchlist(parsed.data.email, brand.id);
+    await addToWatchlist(parsed.data.email, brand.id);
     return Response.json({ ok: true }, { headers: { "Cache-Control": "no-store" } });
   } catch (err) {
     console.error("[watchlist] insert failed:", err instanceof Error ? err.message : err);

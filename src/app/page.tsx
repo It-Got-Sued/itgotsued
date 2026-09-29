@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { connection } from "next/server";
 import { searchCases } from "@/lib/repo/cases";
-import { listBrands } from "@/lib/repo/brands";
+import { countBrands } from "@/lib/repo/brands";
 import type { CaseSearchResult } from "@/lib/types";
 import { Scanner } from "@/components/scan/Scanner";
 import { SearchBox } from "@/components/SearchBox";
@@ -49,9 +49,9 @@ async function loadHome(): Promise<{
   await connection();
   try {
     return {
-      open: searchCases({ status: "claims_open", pageSize: 6 }),
-      totalCases: searchCases({ pageSize: 1 }).total,
-      totalBrands: listBrands().length,
+      open: await searchCases({ status: "claims_open", pageSize: 6 }),
+      totalCases: (await searchCases({ pageSize: 1 })).total,
+      totalBrands: await countBrands(),
     };
   } catch {
     return { open: null, totalCases: 0, totalBrands: 0 };

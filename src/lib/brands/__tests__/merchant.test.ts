@@ -40,4 +40,4 @@ void test("edit distance (OSA)", () => {
   eq(editDistance("abc", "abcdefg", 2), 3); // bounded
 });
 
-setTimeout(finish, 0);
+void finish();

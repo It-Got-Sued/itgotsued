@@ -1,4 +1,4 @@
-// Runs every *.test.ts in this folder in its own process (each uses a fresh DB).
+// Runs every *.test.ts in this folder in its own process (in-memory fixtures, no DB).
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";

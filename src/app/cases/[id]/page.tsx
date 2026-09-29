@@ -17,12 +17,12 @@ import { FollowBrand } from "@/components/case/FollowBrand";
 
 type Props = { params: Promise<{ id: string }> };
 
-const loadCase = cache((id: string) => {
-  const found = getCase(id);
+const loadCase = cache(async (id: string) => {
+  const found = await getCase(id);
   if (found) return found;
   try {
     const decoded = decodeURIComponent(id);
-    return decoded !== id ? getCase(decoded) : null;
+    return decoded !== id ? await getCase(decoded) : null;
   } catch {
     return null;
   }
@@ -30,7 +30,7 @@ const loadCase = cache((id: string) => {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const c = loadCase(id);
+  const c = await loadCase(id);
   if (!c) return { title: "Case not found" };
   return {
     title: c.caseName,
@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CasePage({ params }: Props) {
   const { id } = await params;
-  const c = loadCase(id);
+  const c = await loadCase(id);
   if (!c) notFound();
 
   const status = STATUS_INFO[c.status] ?? STATUS_INFO.unknown;

@@ -1,15 +1,15 @@
-import { getDb } from "@/lib/db";
+import { query, queryOne } from "@/lib/db";
 import type { Brand } from "@/lib/types";
 
 type Row = Record<string, unknown>;
 
-function toBrand(r: Row): Brand {
+export function toBrand(r: Row): Brand {
   return {
     id: r.id as string,
     name: r.name as string,
     normalized: r.normalized as string,
     parentCompany: (r.parent_company as string) ?? null,
-    aliases: JSON.parse((r.aliases as string) ?? "[]"),
+    aliases: (r.aliases as string[]) ?? [],
     category: (r.category as string) ?? null,
   };
 }
@@ -25,48 +25,43 @@ export function normalizeBrandKey(name: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
-export function listBrands(): Brand[] {
-  return (getDb().prepare("SELECT * FROM brands ORDER BY name").all() as Row[]).map(toBrand);
+export async function listBrands(): Promise<Brand[]> {
+  return (await query("SELECT * FROM brands ORDER BY name")).map(toBrand);
 }
 
-export function getBrandByNormalized(normalized: string): Brand | null {
-  const r = getDb()
-    .prepare("SELECT * FROM brands WHERE normalized = $normalized")
-    .get({ normalized }) as Row | undefined;
+export async function countBrands(): Promise<number> {
+  return (await queryOne<{ n: number }>("SELECT COUNT(*)::int AS n FROM brands WHERE NOT is_sample"))?.n ?? 0;
+}
+
+export async function getBrandByNormalized(normalized: string): Promise<Brand | null> {
+  const r = await queryOne("SELECT * FROM brands WHERE normalized = $1", [normalized]);
   return r ? toBrand(r) : null;
 }
 
-/** Brands whose parent_company matches the given brand's name (e.g. Coca-Cola -> Dasani). */
-export function getBrandsByParent(parentCompany: string): Brand[] {
-  return (
-    getDb()
-      .prepare("SELECT * FROM brands WHERE parent_company = $parentCompany")
-      .all({ parentCompany }) as Row[]
-  ).map(toBrand);
+/** Brands whose parent_company matches the given name (e.g. Coca-Cola -> Dasani). */
+export async function getBrandsByParent(parentCompany: string): Promise<Brand[]> {
+  return (await query("SELECT * FROM brands WHERE parent_company = $1", [parentCompany])).map(toBrand);
 }
 
-export function upsertBrand(brand: Omit<Brand, "id"> & { id?: string }): Brand {
-  const db = getDb();
+export async function upsertBrand(
+  brand: Omit<Brand, "id"> & { id?: string; isSample?: boolean },
+): Promise<Brand> {
   const id = brand.id ?? `brand_${brand.normalized}`;
-  db.prepare(
-    `INSERT INTO brands (id, name, normalized, parent_company, aliases, category)
-     VALUES ($id, $name, $normalized, $parent, $aliases, $category)
-     ON CONFLICT(normalized) DO UPDATE SET
-       name = excluded.name, parent_company = excluded.parent_company,
-       aliases = excluded.aliases, category = excluded.category`,
-  ).run({
-    id,
-    name: brand.name,
-    normalized: brand.normalized,
-    parent: brand.parentCompany,
-    aliases: JSON.stringify(brand.aliases),
-    category: brand.category,
-  });
-  return getBrandByNormalized(brand.normalized)!;
+  const r = await queryOne(
+    `INSERT INTO brands (id, name, normalized, parent_company, aliases, category, is_sample)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)
+     ON CONFLICT (normalized) DO UPDATE SET
+       name = EXCLUDED.name, parent_company = EXCLUDED.parent_company,
+       aliases = EXCLUDED.aliases, category = EXCLUDED.category, is_sample = EXCLUDED.is_sample
+     RETURNING *`,
+    [id, brand.name, brand.normalized, brand.parentCompany, brand.aliases, brand.category, brand.isSample ?? false],
+  );
+  return toBrand(r!);
 }
 
-export function addToWatchlist(email: string, brandId: string): void {
-  getDb()
-    .prepare("INSERT OR IGNORE INTO watchlist (email, brand_id) VALUES ($email, $brandId)")
-    .run({ email: email.trim().toLowerCase(), brandId });
+export async function addToWatchlist(email: string, brandId: string): Promise<void> {
+  await query("INSERT INTO watchlist (email, brand_id) VALUES ($1, $2) ON CONFLICT DO NOTHING", [
+    email.trim().toLowerCase(),
+    brandId,
+  ]);
 }

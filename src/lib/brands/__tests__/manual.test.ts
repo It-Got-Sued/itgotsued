@@ -1,11 +1,11 @@
 import { finish, test, eq, ok } from "./harness";
-import { seedFixtures } from "./fixtures";
-import { matchDetections, resolveBrandString, MAX_DETECTIONS } from "../match";
+import { fixtureIndex, fixtureOptions } from "./fixtures";
+import { type MatchOptions, matchDetections, resolveBrandString, MAX_DETECTIONS } from "../match";
 import type { BrandDetection } from "@/lib/types";
 
-seedFixtures();
+const match = (d: BrandDetection[], o: MatchOptions = {}) => matchDetections(d, fixtureOptions(o));
 const manual = (label: string): BrandDetection => ({ brand: label, confidence: 1, source: "manual" });
-const resolved = (label: string) => resolveBrandString(label, "manual")?.brand.name ?? null;
+const resolved = (label: string) => resolveBrandString(label, "manual", fixtureIndex)?.brand.name ?? null;
 
 console.log("manual My Items resolution");
 void test('"Crest toothpaste" -> Crest', () => eq(resolved("Crest toothpaste"), "Crest"));
@@ -19,18 +19,18 @@ void test('"Pelotn tread" -> Peloton (typo, fuzzy on core)', () => eq(resolved("
 void test('"toothpaste" alone -> no brand', () => eq(resolved("toothpaste"), null));
 void test('"Dover sole fillets" -> not Dove', () => ok(resolved("Dover sole fillets") !== "Dove", "matched Dove"));
 
-void test("manual items are never dropped on confidence", () => {
-  const m = matchDetections([{ ...manual("my peloton bike"), confidence: 0.1 }]);
+void test("manual items are never dropped on confidence", async () => {
+  const m = await match([{ ...manual("my peloton bike"), confidence: 0.1 }]);
   eq(m.map((x) => x.brand.name), ["Peloton"]);
   ok(m[0].confidence >= 0.99, "manual confidence should read as user-confirmed");
 });
-void test("manual + activeOnly", () => {
-  const m = matchDetections([manual("Netflix"), manual("Crest toothpaste")], { activeOnly: true });
+void test("manual + activeOnly", async () => {
+  const m = await match([manual("Netflix"), manual("Crest toothpaste")], { activeOnly: true });
   eq(m.map((x) => x.brand.name), ["Procter & Gamble"]);
 });
-void test(`list capped at ${MAX_DETECTIONS}`, () => {
+void test(`list capped at ${MAX_DETECTIONS}`, async () => {
   const items = Array.from({ length: MAX_DETECTIONS }, () => manual("unbranded thing")).concat(manual("Amazon"));
-  eq(matchDetections(items).length, 0, "item 201 must be ignored");
+  eq((await match(items)).length, 0, "item 201 must be ignored");
 });
 
-setTimeout(finish, 0);
+void finish();

@@ -1,5 +1,5 @@
 import { normalizeBrandKey } from "@/lib/repo/brands";
-import { findCasesByBrandIds } from "@/lib/repo/cases";
+import { findCasesByBrandIds, getCaseEvidence, type CaseEvidence } from "@/lib/repo/cases";
 import { ACTIVE_STATUSES } from "@/lib/types";
 import type { Brand, BrandDetection, BrandMatch, CaseSummary } from "@/lib/types";
 import { type BrandIndex, childBrandsOf, getBrandIndex, parentBrandsOf } from "./brand-index";
@@ -23,7 +23,8 @@ import {
 //      "NETFLIX LOS GATOS"); rules depend on the source (see spanAllowed)
 //   5. conservative fuzzy: OSA edit distance on the whole key, >= 6 chars, same first
 //      letter, distance 1 (<= 2 for >= 9 chars), unique best candidate
-// Then expand via parent company both ways and attach cases.
+// Then expand through the ownership chain both ways (all parents up, all subsidiaries down)
+// and attach cases.
 
 export type MatchMethod = "exact" | "alias" | "compact" | "token" | "fuzzy";
 /** direct = the detected brand; parent = its parent company; subsidiary = a brand the detected company owns. */
@@ -35,6 +36,16 @@ export interface RankedBrandMatch extends BrandMatch {
   via: string[];
   method: MatchMethod;
   confidence: number;
+  /**
+   * Parent-company matches only: case id -> the brand name found in that case's filings,
+   * showing why the parent's lawsuit applies to the brand the user owns.
+   */
+  mentions?: Record<string, string>;
+  /**
+   * Parent-company matches only: lawsuits against the parent whose filings we have don't name
+   * the user's brand. They are left out of `cases` (not shown as applicable).
+   */
+  unverifiedCount?: number;
 }
 
 export interface MatchOptions {
@@ -44,6 +55,10 @@ export interface MatchOptions {
   minConfidence?: number;
   /** Injected for tests; defaults to the brands table. */
   index?: BrandIndex;
+  /** Injected for tests; defaults to findCasesByBrandIds against the database. */
+  casesByBrand?: (brandIds: string[]) => Map<string, CaseSummary[]> | Promise<Map<string, CaseSummary[]>>;
+  /** Injected for tests; defaults to getCaseEvidence against the database. */
+  caseEvidence?: (caseIds: string[]) => Map<string, CaseEvidence> | Promise<Map<string, CaseEvidence>>;
 }
 
 export const MIN_MATCH_CONFIDENCE = 0.5;
@@ -56,7 +71,10 @@ const METHOD_WEIGHT: Record<MatchMethod, number> = {
   token: 0.9,
   fuzzy: 0.8,
 };
+/** Per hop: a grandparent scores parent^2, and so on. */
 const RELATION_WEIGHT: Record<BrandRelation, number> = { direct: 1, parent: 0.95, subsidiary: 0.75 };
+/** Ownership levels walked each way; also guards against parent_company cycles. */
+const MAX_CHAIN_DEPTH = 6;
 const RELATION_RANK: Record<BrandRelation, number> = { direct: 0, parent: 1, subsidiary: 2 };
 
 export interface Resolution {
@@ -169,7 +187,7 @@ function looksLikeMerchant(s: string): boolean {
 export function resolveBrandString(
   raw: string,
   source: BrandDetection["source"],
-  index: BrandIndex = getBrandIndex(),
+  index: BrandIndex,
 ): Resolution | null {
   const isBankish = source === "bank" || source === "receipt";
   const candidates = [raw];
@@ -227,23 +245,55 @@ interface Accum {
   detections: BrandDetection[];
   scores: number[];
   via: Set<string>;
+  /** Parent matches: the owned brands below this company that led here (for applicability). */
+  viaBrands: Map<string, Brand>;
   manual: boolean;
 }
 
-export function matchDetections(detections: BrandDetection[], options: MatchOptions = {}): RankedBrandMatch[] {
-  const index = options.index ?? getBrandIndex();
+/** Lowercase, punctuation-free, space-padded text for whole-word "mentions" checks. */
+function wordText(s: string): string {
+  return ` ${s.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/&/g, " and ").replace(/[^a-z0-9]+/g, " ").trim()} `;
+}
+
+/** The first of `brands` (by name or alias) that `text` names as a whole word, if any. */
+export function mentionedBrand(text: string, brands: Brand[]): string | null {
+  const hay = wordText(text);
+  for (const b of brands) {
+    for (const term of [b.name, stripCorporateSuffix(b.name), ...b.aliases]) {
+      const needle = wordText(term);
+      if (needle.trim().length >= 3 && hay.includes(needle)) return b.name;
+    }
+  }
+  return null;
+}
+
+export async function matchDetections(
+  detections: BrandDetection[],
+  options: MatchOptions = {},
+): Promise<RankedBrandMatch[]> {
+  const index = options.index ?? (await getBrandIndex());
   const minConfidence = options.minConfidence ?? MIN_MATCH_CONFIDENCE;
   const acc = new Map<string, Accum>();
 
-  const add = (brand: Brand, relation: BrandRelation, method: MatchMethod, d: BrandDetection, score: number, via?: string) => {
+  const add = (
+    brand: Brand,
+    relation: BrandRelation,
+    method: MatchMethod,
+    d: BrandDetection,
+    score: number,
+    via?: string,
+    viaBrands: Brand[] = [],
+  ) => {
     const cur = acc.get(brand.id);
     const manual = d.source === "manual";
     if (!cur) {
       acc.set(brand.id, {
-        brand, relation, method, detections: [d], scores: [score], via: new Set(via ? [via] : []), manual,
+        brand, relation, method, detections: [d], scores: [score], via: new Set(via ? [via] : []),
+        viaBrands: new Map(viaBrands.map((b) => [b.id, b])), manual,
       });
       return;
     }
+    for (const b of viaBrands) cur.viaBrands.set(b.id, b);
     if (RELATION_RANK[relation] < RELATION_RANK[cur.relation]) {
       cur.relation = relation;
       cur.method = method;
@@ -262,24 +312,39 @@ export function matchDetections(detections: BrandDetection[], options: MatchOpti
     const base = (d.source === "manual" ? 1 : d.confidence) * METHOD_WEIGHT[res.method];
     add(res.brand, "direct", res.method, d, base);
 
-    // Up: parent company chain (Dasani -> The Coca-Cola Company), max 3 levels.
+    // Up: climb the whole ownership chain (Ring -> Amazon.com, Inc. / Amazon, Pure
+    // Encapsulations -> Nestlé Health Science -> Nestlé) so parent-company cases are never missed.
+    // Each step remembers the owned brands below it, so a grandparent's lawsuit can be
+    // checked for a mention of the brand itself or any company in between.
     const seen = new Set([res.brand.id]);
-    let frontier = [res.brand];
-    for (let depth = 0; depth < 3 && frontier.length; depth++) {
-      const next: Brand[] = [];
-      for (const b of frontier) for (const parent of parentBrandsOf(index, b)) {
+    let chain: Array<{ brand: Brand; below: Brand[] }> = [{ brand: res.brand, below: [] }];
+    let score = base;
+    for (let depth = 0; depth < MAX_CHAIN_DEPTH && chain.length; depth++) {
+      score *= RELATION_WEIGHT.parent;
+      const next: typeof chain = [];
+      for (const { brand: b, below } of chain) for (const parent of parentBrandsOf(index, b)) {
         if (seen.has(parent.id)) continue;
         seen.add(parent.id);
-        add(parent, "parent", res.method, d, base * RELATION_WEIGHT.parent, res.brand.name);
-        next.push(parent);
+        const path = [...below, b];
+        add(parent, "parent", res.method, d, score, res.brand.name, path);
+        next.push({ brand: parent, below: path });
+      }
+      chain = next;
+    }
+    // Down: a detected company surfaces its brands' cases, through every level it owns.
+    // Always applicable: the company the user named owns the brand that was sued.
+    let frontier = [res.brand];
+    score = base;
+    for (let depth = 0; depth < MAX_CHAIN_DEPTH && frontier.length; depth++) {
+      score *= RELATION_WEIGHT.subsidiary;
+      const next: Brand[] = [];
+      for (const b of frontier) for (const child of childBrandsOf(index, b)) {
+        if (seen.has(child.id)) continue;
+        seen.add(child.id);
+        add(child, "subsidiary", res.method, d, score, res.brand.name);
+        next.push(child);
       }
       frontier = next;
-    }
-    // Down: a detected company surfaces its brands' cases (one level).
-    for (const child of childBrandsOf(index, res.brand)) {
-      if (seen.has(child.id)) continue;
-      seen.add(child.id);
-      add(child, "subsidiary", res.method, d, base * RELATION_WEIGHT.subsidiary, res.brand.name);
     }
   }
 
@@ -287,18 +352,42 @@ export function matchDetections(detections: BrandDetection[], options: MatchOpti
     .map((a) => ({ ...a, confidence: combine(a.scores) }))
     .filter((a) => a.manual || a.confidence >= minConfidence);
 
-  const casesByBrand = findCasesByBrandIds(kept.map((a) => a.brand.id));
+  const casesByBrand = await (options.casesByBrand ?? findCasesByBrandIds)(kept.map((a) => a.brand.id));
   const active = new Set(ACTIVE_STATUSES);
+  if (options.activeOnly) {
+    for (const [id, list] of casesByBrand) casesByBrand.set(id, list.filter((c) => active.has(c.status)));
+  }
+
+  // Parent-company lawsuits apply only when their filings name the user's brand (or a company
+  // between it and the parent). "Walsh v. PepsiCo" naming The Gatorade Company applies to
+  // Gatorade, not to Cheetos.
+  const parentCaseIds = [
+    ...new Set(kept.filter((a) => a.relation === "parent").flatMap((a) => (casesByBrand.get(a.brand.id) ?? []).map((c) => c.id))),
+  ];
+  const evidence = parentCaseIds.length
+    ? await (options.caseEvidence ?? getCaseEvidence)(parentCaseIds)
+    : new Map<string, CaseEvidence>();
 
   // A case linked to several matched brands is shown once, under the closest relation.
   kept.sort((a, b) => RELATION_RANK[a.relation] - RELATION_RANK[b.relation] || b.confidence - a.confidence);
   const shownCases = new Set<string>();
   const results: RankedBrandMatch[] = [];
   for (const a of kept) {
-    let cases: CaseSummary[] = casesByBrand.get(a.brand.id) ?? [];
-    if (options.activeOnly) cases = cases.filter((c) => active.has(c.status));
-    cases = cases.filter((c) => !shownCases.has(c.id));
-    if (!cases.length) continue;
+    let cases: CaseSummary[] = (casesByBrand.get(a.brand.id) ?? []).filter((c) => !shownCases.has(c.id));
+    let mentions: Record<string, string> | undefined;
+    let unverifiedCount: number | undefined;
+    if (a.relation === "parent") {
+      mentions = {};
+      unverifiedCount = 0;
+      const below = [...a.viaBrands.values()];
+      cases = cases.filter((c) => {
+        const found = mentionedBrand(evidence.get(c.id)?.text ?? c.caseName ?? "", below);
+        if (found) mentions![c.id] = found;
+        else unverifiedCount!++;
+        return Boolean(found);
+      });
+    }
+    if (!cases.length && !unverifiedCount) continue;
     for (const c of cases) shownCases.add(c.id);
     const via = [...a.via].filter((v) => v !== a.brand.name);
     results.push({
@@ -309,6 +398,7 @@ export function matchDetections(detections: BrandDetection[], options: MatchOpti
       via,
       method: a.method,
       confidence: round2(a.manual ? Math.max(a.confidence, 0.99) : a.confidence),
+      ...(mentions ? { mentions, unverifiedCount } : {}),
     });
   }
 

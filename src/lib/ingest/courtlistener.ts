@@ -18,15 +18,34 @@ export const CL_STORAGE = "https://storage.courtlistener.com";
 /** Nature-of-suit codes typical of consumer class actions. */
 export const CONSUMER_NOS = ["190", "370", "371", "380", "385", "480", "485", "890"];
 
-/** Phrases that appear in class action complaints; cause 28:1453 is CAFA removal. */
-export function buildClassActionQuery(nos: string[] = CONSUMER_NOS): string {
+/**
+ * Phrases that appear in class action filings; cause 28:1453 is CAFA removal.
+ * Pass `nos = null` to search every nature of suit (securities, privacy, employment, ...).
+ */
+export function buildClassActionQuery(nos: string[] | null = CONSUMER_NOS): string {
   const signals = [
-    '"class action complaint"',
+    '"class action"',
     '"all others similarly situated"',
     '"putative class"',
     'cause:"1453"',
   ].join(" OR ");
-  return `(${signals}) AND suitNature:(${nos.join(" OR ")})`;
+  return nos ? `(${signals}) AND suitNature:(${nos.join(" OR ")})` : `(${signals})`;
+}
+
+/**
+ * Class settlements with court activity since `since` (YYYY-MM-DD), whatever year the case was
+ * filed. Catches older cases (e.g. filed in 2025) that are now paying out.
+ */
+export function buildSettlementActivityQuery(since: string): string {
+  const settlement = [
+    '"preliminary approval"',
+    '"final approval"',
+    '"claims deadline"',
+    '"claim deadline"',
+    '"settlement administrator"',
+    '"class settlement"',
+  ].join(" OR ");
+  return `(${settlement}) AND ("class action" OR "class settlement" OR "settlement class") AND entry_date_filed:[${since} TO *]`;
 }
 
 export interface ClRecapDocument {
@@ -242,4 +261,25 @@ export function fromDocketEntriesApi(entries: ClDocketEntry[]): {
     });
   }
   return { entries: out, docs };
+}
+
+/** Map a search hit to the fields upsertCaseRecord takes. */
+export function toCaseRecord(r: ClSearchDocket, docs: ClRecapDocument[] = r.recap_documents ?? []) {
+  return {
+    id: caseIdForDocket(r.docket_id),
+    source: "courtlistener",
+    sourceId: String(r.docket_id),
+    sourceUrl: `${CL_BASE}${r.docket_absolute_url}`,
+    caseName: r.caseName || r.case_name_full || `Docket ${r.docket_id}`,
+    court: r.court || r.court_id,
+    courtId: r.court_id || null,
+    dateFiled: r.dateFiled || null,
+    dateTerminated: r.dateTerminated || null,
+    docketNumber: r.docketNumber || null,
+    // Default 'filed'; a terminated docket's outcome is unknown until its filings say more.
+    status: r.dateTerminated ? ("unknown" as const) : ("filed" as const),
+    natureOfSuit: r.suitNature?.trim() || null,
+    cause: r.cause?.trim() || null,
+    complaintUrl: pickComplaintUrl(docs),
+  };
 }

@@ -1,4 +1,4 @@
-import { getDb } from "@/lib/db";
+import { query, queryOne } from "@/lib/db";
 import type {
   CaseDetail,
   CaseSearchParams,
@@ -13,9 +13,12 @@ type Row = Record<string, unknown>;
 const SUMMARY_COLUMNS = `
   c.id, c.case_name, c.court, c.docket_number, c.date_filed, c.status, c.summary,
   c.claim_url, c.claim_deadline, c.is_sample,
-  (SELECT json_group_array(b.name) FROM case_brands cb JOIN brands b ON b.id = cb.brand_id
-   WHERE cb.case_id = c.id) AS brand_names
+  COALESCE((SELECT array_agg(b.name ORDER BY b.name) FROM case_brands cb
+            JOIN brands b ON b.id = cb.brand_id WHERE cb.case_id = c.id), '{}') AS brand_names
 `;
+
+const iso = (v: unknown): string | null =>
+  v == null ? null : v instanceof Date ? v.toISOString() : String(v);
 
 function toSummary(r: Row): CaseSummary {
   return {
@@ -23,91 +26,85 @@ function toSummary(r: Row): CaseSummary {
     caseName: r.case_name as string,
     court: r.court as string,
     docketNumber: (r.docket_number as string) ?? null,
-    dateFiled: (r.date_filed as string) ?? null,
+    dateFiled: iso(r.date_filed),
     status: r.status as CaseStatus,
     summary: (r.summary as string) ?? null,
-    brands: JSON.parse((r.brand_names as string) ?? "[]"),
+    brands: (r.brand_names as string[]) ?? [],
     claimUrl: (r.claim_url as string) ?? null,
-    claimDeadline: (r.claim_deadline as string) ?? null,
+    claimDeadline: iso(r.claim_deadline),
     isSample: Boolean(r.is_sample),
   };
 }
 
-// FTS5 query from free text: quote each token so user input cannot inject FTS syntax.
-function ftsQuery(q: string): string {
-  return q
-    .split(/\s+/)
-    .map((t) => t.replace(/"/g, ""))
-    .filter(Boolean)
-    .map((t) => `"${t}"*`)
-    .join(" ");
+/** Builds WHERE clauses with numbered placeholders. */
+class Where {
+  clauses: string[] = [];
+  params: unknown[] = [];
+  arg(v: unknown) {
+    this.params.push(v);
+    return `$${this.params.length}`;
+  }
+  toString() {
+    return this.clauses.length ? `WHERE ${this.clauses.join(" AND ")}` : "";
+  }
 }
 
-export function searchCases(params: CaseSearchParams): CaseSearchResult {
-  const db = getDb();
-  const where: string[] = [];
-  const args: Record<string, string | number> = {};
+export async function searchCases(params: CaseSearchParams): Promise<CaseSearchResult> {
+  const w = new Where();
 
   if (params.q?.trim()) {
-    where.push(
-      `(c.rowid IN (SELECT rowid FROM cases_fts WHERE cases_fts MATCH $fts)
+    const q = params.q.trim();
+    const tsq = w.arg(q);
+    const like = w.arg(`%${q}%`);
+    w.clauses.push(
+      `(c.search @@ websearch_to_tsquery('english', ${tsq})
+        OR c.case_name ILIKE ${like}
+        OR c.id IN (SELECT d.case_id FROM docket_entries d WHERE d.description ILIKE ${like})
         OR c.id IN (SELECT cb.case_id FROM case_brands cb JOIN brands b ON b.id = cb.brand_id
-                    WHERE b.name LIKE $like OR b.aliases LIKE $like))`,
+                    WHERE b.name ILIKE ${like}
+                       OR EXISTS (SELECT 1 FROM unnest(b.aliases) a WHERE a ILIKE ${like})))`,
     );
-    args.fts = ftsQuery(params.q);
-    args.like = `%${params.q.trim()}%`;
   }
-  if (params.status) {
-    where.push("c.status = $status");
-    args.status = params.status;
-  }
+  if (params.status) w.clauses.push(`c.status = ${w.arg(params.status)}`);
   if (params.brand) {
-    where.push(
-      "c.id IN (SELECT cb.case_id FROM case_brands cb JOIN brands b ON b.id = cb.brand_id WHERE b.normalized = $brand)",
+    w.clauses.push(
+      `c.id IN (SELECT cb.case_id FROM case_brands cb JOIN brands b ON b.id = cb.brand_id
+                WHERE b.normalized = ${w.arg(params.brand)})`,
     );
-    args.brand = params.brand;
   }
-  if (params.state) {
-    where.push("EXISTS (SELECT 1 FROM json_each(c.states) WHERE value = $state)");
-    args.state = params.state.toUpperCase();
-  }
+  if (params.state) w.clauses.push(`${w.arg(params.state.toUpperCase())} = ANY(c.states)`);
 
-  const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
   const pageSize = Math.min(Math.max(params.pageSize ?? 20, 1), 100);
   const page = Math.max(params.page ?? 1, 1);
+  const where = w.toString();
 
-  const total = (
-    db.prepare(`SELECT COUNT(*) AS n FROM cases c ${whereSql}`).get(args) as { n: number }
-  ).n;
+  const [countRow, rows] = await Promise.all([
+    queryOne<{ n: number }>(`SELECT COUNT(*)::int AS n FROM cases c ${where}`, w.params),
+    query(
+      `SELECT ${SUMMARY_COLUMNS} FROM cases c ${where}
+       ORDER BY (c.status = 'claims_open') DESC, c.is_sample ASC, c.date_filed DESC NULLS LAST, c.id
+       LIMIT ${pageSize} OFFSET ${(page - 1) * pageSize}`,
+      w.params,
+    ),
+  ]);
 
-  const rows = db
-    .prepare(
-      `SELECT ${SUMMARY_COLUMNS} FROM cases c ${whereSql}
-       ORDER BY (c.status = 'claims_open') DESC, c.date_filed DESC
-       LIMIT $limit OFFSET $offset`,
-    )
-    .all({ ...args, limit: pageSize, offset: (page - 1) * pageSize }) as Row[];
-
-  return { cases: rows.map(toSummary), total };
+  return { cases: rows.map(toSummary), total: countRow?.n ?? 0 };
 }
 
-export function getCase(id: string): CaseDetail | null {
-  const db = getDb();
-  const r = db
-    .prepare(
-      `SELECT ${SUMMARY_COLUMNS}, c.source, c.source_url, c.nature_of_suit, c.who_qualifies,
-              c.complaint_url, c.settlement_amount, c.states, c.categories, c.last_checked
-       FROM cases c WHERE c.id = $id`,
-    )
-    .get({ id }) as Row | undefined;
+export async function getCase(id: string): Promise<CaseDetail | null> {
+  const r = await queryOne(
+    `SELECT ${SUMMARY_COLUMNS}, c.source, c.source_url, c.nature_of_suit, c.who_qualifies,
+            c.complaint_url, c.settlement_amount, c.states, c.categories, c.last_checked
+     FROM cases c WHERE c.id = $1`,
+    [id],
+  );
   if (!r) return null;
 
-  const entries = db
-    .prepare(
-      `SELECT entry_number, date_filed, description, document_url FROM docket_entries
-       WHERE case_id = $id ORDER BY entry_number`,
-    )
-    .all({ id }) as Row[];
+  const entries = await query(
+    `SELECT entry_number, date_filed, description, document_url FROM docket_entries
+     WHERE case_id = $1 ORDER BY entry_number NULLS LAST, date_filed, id`,
+    [id],
+  );
 
   return {
     ...toSummary(r),
@@ -117,13 +114,13 @@ export function getCase(id: string): CaseDetail | null {
     whoQualifies: (r.who_qualifies as string) ?? null,
     complaintUrl: (r.complaint_url as string) ?? null,
     settlementAmount: (r.settlement_amount as string) ?? null,
-    states: JSON.parse((r.states as string) ?? "[]"),
-    categories: JSON.parse((r.categories as string) ?? "[]"),
-    lastChecked: (r.last_checked as string) ?? null,
+    states: (r.states as string[]) ?? [],
+    categories: (r.categories as string[]) ?? [],
+    lastChecked: iso(r.last_checked),
     docketEntries: entries.map(
       (e): DocketEntry => ({
         entryNumber: (e.entry_number as number) ?? null,
-        dateFiled: (e.date_filed as string) ?? null,
+        dateFiled: iso(e.date_filed),
         description: e.description as string,
         documentUrl: (e.document_url as string) ?? null,
       }),
@@ -131,18 +128,40 @@ export function getCase(id: string): CaseDetail | null {
   };
 }
 
-export function findCasesByBrandIds(brandIds: string[]): Map<string, CaseSummary[]> {
+export async function findCasesByBrandIds(brandIds: string[]): Promise<Map<string, CaseSummary[]>> {
   const result = new Map<string, CaseSummary[]>();
   if (!brandIds.length) return result;
-  const db = getDb();
-  const stmt = db.prepare(
-    `SELECT ${SUMMARY_COLUMNS} FROM cases c
+  const rows = await query(
+    `SELECT cb.brand_id AS match_brand_id, ${SUMMARY_COLUMNS} FROM cases c
      JOIN case_brands cb ON cb.case_id = c.id
-     WHERE cb.brand_id = $brandId
-     ORDER BY (c.status = 'claims_open') DESC, c.date_filed DESC`,
+     WHERE cb.brand_id = ANY($1)
+     ORDER BY (c.status = 'claims_open') DESC, c.date_filed DESC NULLS LAST`,
+    [brandIds],
   );
-  for (const brandId of brandIds) {
-    result.set(brandId, (stmt.all({ brandId }) as Row[]).map(toSummary));
-  }
+  for (const id of brandIds) result.set(id, []);
+  for (const r of rows) result.get(r.match_brand_id as string)?.push(toSummary(r));
   return result;
+}
+
+export interface CaseEvidence {
+  /** Case name, summary, class definition, products at issue and docket text, joined. */
+  text: string;
+  /** True once AI enrichment has read the case (summary present). */
+  enriched: boolean;
+}
+
+/** Everything we know a case says, for checking whether it names a specific brand. */
+export async function getCaseEvidence(caseIds: string[]): Promise<Map<string, CaseEvidence>> {
+  const out = new Map<string, CaseEvidence>();
+  if (!caseIds.length) return out;
+  const rows = await query<{ id: string; text: string; enriched: boolean }>(
+    `SELECT c.id, (c.summary IS NOT NULL) AS enriched,
+            concat_ws(' ', c.case_name, c.summary, c.who_qualifies,
+              (SELECT string_agg(array_to_string(cb.products, ' '), ' ') FROM case_brands cb WHERE cb.case_id = c.id),
+              (SELECT string_agg(d.description, ' ') FROM docket_entries d WHERE d.case_id = c.id)) AS text
+     FROM cases c WHERE c.id = ANY($1)`,
+    [caseIds],
+  );
+  for (const r of rows) out.set(r.id, { text: r.text ?? "", enriched: r.enriched });
+  return out;
 }

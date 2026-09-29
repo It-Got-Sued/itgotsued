@@ -9,7 +9,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   if (!id || id.length > 200) {
     return Response.json({ error: "Case not found." }, { status: 404 });
   }
-  const detail: CaseDetail | null = getCase(id);
+  const detail: CaseDetail | null = await getCase(id);
   if (!detail) return Response.json({ error: "Case not found." }, { status: 404 });
   return Response.json(detail, { headers: { "Cache-Control": "no-store" } });
 }

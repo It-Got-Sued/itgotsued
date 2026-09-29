@@ -40,7 +40,7 @@ export async function GET(request: Request) {
     );
   }
   try {
-    const result: CaseSearchResult = searchCases(parsed.data as CaseSearchParams);
+    const result: CaseSearchResult = await searchCases(parsed.data as CaseSearchParams);
     return Response.json(result, { headers: { "Cache-Control": "no-store" } });
   } catch (err) {
     console.error("[cases] search failed:", err instanceof Error ? err.message : err);

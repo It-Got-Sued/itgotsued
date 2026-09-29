@@ -1,10 +1,11 @@
-import { getDb } from "@/lib/db";
-import { normalizeBrandKey, upsertBrand } from "@/lib/repo/brands";
-import { invalidateBrandIndex } from "../brand-index";
-import type { CaseStatus } from "@/lib/types";
+import type { CaseEvidence } from "@/lib/repo/cases";
+import { normalizeBrandKey } from "@/lib/repo/brands";
+import type { Brand, CaseStatus, CaseSummary } from "@/lib/types";
+import { buildBrandIndex } from "../brand-index";
+import type { MatchOptions } from "../match";
 
-// Test fixture brands/cases. Mirrors the shapes the seeding agent produces but is
-// self-contained so tests never depend on seeded data.
+// Test fixture brands/cases, held in memory (no database). Mirrors the shapes the seeding
+// agent produces but is self-contained so tests never depend on seeded data.
 
 const BRANDS: Array<[name: string, parent: string | null, aliases: string[], category: string | null]> = [
   ["The Coca-Cola Company", null, ["Coca-Cola Co", "KO"], "beverage"],
@@ -44,26 +45,100 @@ const CASES: Array<[id: string, brand: string, status: CaseStatus, date: string]
   ["c-samsung", "samsung", "claims_closed", "2019-10-02"],
 ];
 
-export function seedFixtures(): void {
-  const db = getDb();
-  for (const [name, parent, aliases, category] of BRANDS) {
-    const normalized = normalizeBrandKey(name);
-    upsertBrand({ name, normalized, parentCompany: parent, aliases, category });
-  }
-  const insertCase = db.prepare(
-    `INSERT OR REPLACE INTO cases (id, source, source_id, case_name, court, status, date_filed, is_sample)
-     VALUES ($id, 'sample', $id, $name, 'N.D. Cal.', $status, $date, 1)`,
+// Same shape upsertBrand produced: id = brand_<normalized>. Sorted by name like listBrands().
+export const fixtureBrands: Brand[] = BRANDS.map(([name, parent, aliases, category]) => {
+  const normalized = normalizeBrandKey(name);
+  return { id: `brand_${normalized}`, name, normalized, parentCompany: parent, aliases, category };
+}).sort((a, b) => a.name.localeCompare(b.name));
+
+export const fixtureIndex = buildBrandIndex(fixtureBrands);
+
+const summary = (id: string, caseName: string, status: CaseStatus, dateFiled: string, brandIds: string[]): CaseSummary => ({
+  id,
+  caseName,
+  court: "N.D. Cal.",
+  docketNumber: null,
+  dateFiled,
+  status,
+  summary: null,
+  brands: brandIds.map((b) => fixtureIndex.byId.get(b)?.name ?? b),
+  claimUrl: null,
+  claimDeadline: null,
+  isSample: true,
+});
+
+const links: Array<{ brandId: string; case: CaseSummary }> = [];
+for (const [id, brand, status, date] of CASES) {
+  const brandId = `brand_${brand}`;
+  links.push({ brandId, case: summary(id, `Doe v. ${brand}`, status, date, [brandId]) });
+}
+// A case against both Dasani and its parent: must only be shown once.
+const shared = summary("c-shared", "Roe v. Dasani & Coca-Cola", "filed", "2025-11-01", [
+  "brand_dasani",
+  "brand_the-coca-cola-company",
+]);
+for (const brandId of ["brand_dasani", "brand_the-coca-cola-company"]) links.push({ brandId, case: shared });
+
+/** In-memory equivalent of findCasesByBrandIds (claims_open first, then newest filed). */
+export function fixtureCasesByBrand(brandIds: string[]): Map<string, CaseSummary[]> {
+  const result = new Map<string, CaseSummary[]>();
+  for (const id of brandIds) result.set(id, []);
+  const ordered = [...links].sort(
+    (a, b) =>
+      Number(b.case.status === "claims_open") - Number(a.case.status === "claims_open") ||
+      (b.case.dateFiled ?? "").localeCompare(a.case.dateFiled ?? ""),
   );
-  const link = db.prepare(
-    `INSERT OR REPLACE INTO case_brands (case_id, brand_id) VALUES ($caseId, $brandId)`,
+  for (const l of ordered) result.get(l.brandId)?.push(l.case);
+  return result;
+}
+
+/**
+ * Filing text for parent-company cases, so the "parent lawsuit must name the brand" rule has
+ * something to read. c-ko-parent names Dasani and Coca-Cola; c-pg names Crest but not Tide;
+ * c-unilever names no brand.
+ */
+export const FIXTURE_FILINGS: Record<string, string> = {
+  "c-ko-parent": "CLASS ACTION COMPLAINT against The Coca-Cola Company regarding Dasani and Coca-Cola labeling",
+  "c-pg": "COMPLAINT against The Procter & Gamble Co. concerning Crest toothpaste whitening claims",
+  "c-unilever": "COMPLAINT against Unilever United States, Inc.",
+};
+
+/** In-memory equivalent of getCaseEvidence. */
+export function fixtureCaseEvidence(caseIds: string[]): Map<string, CaseEvidence> {
+  const byId = new Map(links.map((l) => [l.case.id, l.case]));
+  return new Map(
+    caseIds.map((id) => [
+      id,
+      { text: `${byId.get(id)?.caseName ?? ""} ${FIXTURE_FILINGS[id] ?? ""}`, enriched: false },
+    ]),
   );
-  for (const [id, brand, status, date] of CASES) {
-    insertCase.run({ id, name: `Doe v. ${brand}`, status, date });
-    link.run({ caseId: id, brandId: `brand_${brand}` });
-  }
-  // A case against both Dasani and its parent: must only be shown once.
-  insertCase.run({ id: "c-shared", name: "Roe v. Dasani & Coca-Cola", status: "filed", date: "2025-11-01" });
-  link.run({ caseId: "c-shared", brandId: "brand_dasani" });
-  link.run({ caseId: "c-shared", brandId: "brand_the-coca-cola-company" });
-  invalidateBrandIndex();
+}
+
+/** matchDetections options wired to the fixtures; spread extra options over it. */
+export function fixtureOptions(extra: MatchOptions = {}): MatchOptions {
+  return { index: fixtureIndex, casesByBrand: fixtureCasesByBrand, caseEvidence: fixtureCaseEvidence, ...extra };
+}
+
+/**
+ * For code paths with no injection point (detectBrandsInText -> getBrandIndex -> listBrands):
+ * install a stub pg Pool on the global slot getPool() reads, serving only the brands listing
+ * from the fixtures. Any other query throws, so nothing silently touches a real database.
+ */
+export function installFixturePool(): void {
+  const rows = fixtureBrands.map((b) => ({
+    id: b.id,
+    name: b.name,
+    normalized: b.normalized,
+    parent_company: b.parentCompany,
+    aliases: b.aliases,
+    category: b.category,
+    is_sample: true,
+  }));
+  const stub = {
+    async query(text: string) {
+      if (/^\s*SELECT \* FROM brands ORDER BY name\s*$/i.test(text)) return { rows };
+      throw new Error(`fixture pool: unexpected query: ${text}`);
+    },
+  };
+  (globalThis as unknown as { __pgPool?: unknown }).__pgPool = stub;
 }

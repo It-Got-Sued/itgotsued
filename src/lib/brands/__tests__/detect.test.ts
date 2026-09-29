@@ -1,25 +1,26 @@
 import { finish, test, eq, ok } from "./harness";
-import { seedFixtures } from "./fixtures";
+import { fixtureIndex, installFixturePool } from "./fixtures";
 import { detectBrandsByDictionary, detectBrandsInText } from "../detect-text";
 import { ImageValidationError, sniffImageType, validateImage, MAX_IMAGE_BYTES } from "../detect-image";
 import { rateLimit, resetRateLimits } from "../rate-limit";
 
-seedFixtures();
+// detectBrandsInText has no index injection point: serve getBrandIndex() from the fixtures.
+installFixturePool();
 
 console.log("text dictionary fallback");
 void test("finds brands and aliases", () => {
-  const d = detectBrandsByDictionary("I drink Coke, use Crest and take Nature Made vitamins");
+  const d = detectBrandsByDictionary("I drink Coke, use Crest and take Nature Made vitamins", fixtureIndex);
   eq(d.map((x) => x.brand).sort(), ["Coca-Cola", "Crest", "Nature Made"]);
   ok(d.every((x) => x.source === "text"), "source");
 });
 void test("longest phrase wins, whole words only", () => {
-  eq(detectBrandsByDictionary("Blue Bottle coffee and a Dover Saddlery saddle").map((x) => x.brand).sort(), [
+  eq(detectBrandsByDictionary("Blue Bottle coffee and a Dover Saddlery saddle", fixtureIndex).map((x) => x.brand).sort(), [
     "Blue Bottle Coffee", "Dover Saddlery",
   ]);
-  eq(detectBrandsByDictionary("Doves flew over Dovercourt").length, 0);
+  eq(detectBrandsByDictionary("Doves flew over Dovercourt", fixtureIndex).length, 0);
 });
 void test("negation skips brands after the negator", () => {
-  eq(detectBrandsByDictionary("I drink Coke but I don't use Crest").map((x) => x.brand), ["Coca-Cola"]);
+  eq(detectBrandsByDictionary("I drink Coke but I don't use Crest", fixtureIndex).map((x) => x.brand), ["Coca-Cola"]);
 });
 void test("no API key -> dictionary path", async () => {
   const saved = process.env.ANTHROPIC_API_KEY;
@@ -67,4 +68,4 @@ void test("blocks after limit per key", () => {
   eq(rateLimit("t", "5.6.7.8", 3, 60_000).ok, true);
 });
 
-setTimeout(finish, 50);
+void finish();

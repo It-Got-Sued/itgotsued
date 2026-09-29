@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from "motion/react";
 import type { BrandDetection, BrandMatch } from "@/lib/types";
 import { apiFetch, messageFor } from "../api";
 import { Alert, Spinner } from "../Alert";
-import { BrandMatchSection } from "../MatchResults";
+import { BrandMatchSection, ParentNotes } from "../MatchResults";
 import { AddToMyItems } from "../myitems/AddToMyItems";
 import { IconBank, IconCamera, IconPencil, IconSparkle } from "../icons";
 import { brandKey, groupDetections } from "./detections";
@@ -242,6 +242,7 @@ export function Scanner({ headingLevel = 2 }: { headingLevel?: 1 | 2 }) {
               <BrandMatchSection match={m} actions={<AddToMyItems items={[{ label: m.brand.name }]} />} />
             </motion.div>
           ))}
+          <ParentNotes matches={match.matches} />
           {unmatched.length > 0 && (
             <p className="text-sm text-muted">
               No lawsuits found yet for: {unmatched.map((g) => g.label).join(", ")}. Save them to{" "}

@@ -5,7 +5,7 @@ import type { BrandMatch, CaseSummary, MatchRequest, OwnedItem } from "@/lib/typ
 import { apiFetch, messageFor } from "../api";
 import { Alert, Spinner } from "../Alert";
 import { CaseCard } from "../CaseCard";
-import { sortClaimsOpenFirst } from "../MatchResults";
+import { ParentNotes, sortClaimsOpenFirst } from "../MatchResults";
 import { ItemRow } from "./ItemRow";
 import { AnimatePresence, motion } from "motion/react";
 import {
@@ -257,6 +257,7 @@ function ItemResults({ items, matches, stale }: { items: OwnedItem[]; matches: B
           </ul>
         </motion.section>
       ))}
+      <ParentNotes matches={matches} />
       {none.length > 0 && (
         <div className="space-y-1">
           <h3 className="font-semibold">No active lawsuits found yet</h3>

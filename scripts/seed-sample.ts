@@ -2,11 +2,13 @@
 // Every company and brand in that file is invented; rows get is_sample=1, source='sample'.
 //   npm run db:seed   (runs seed-brands, then this)
 // Idempotent: cases upsert on (source, slug); docket entries and brand links are replaced.
+// Not part of the production seed: run `npm run db:seed:sample` for local development only.
 import "./_env";
 import fs from "node:fs";
-import { getDb } from "@/lib/db";
+import { closePool } from "@/lib/db";
 import { getBrandByNormalized, normalizeBrandKey, upsertBrand } from "@/lib/repo/brands";
 import {
+  clearCaseBrands,
   linkCaseBrand,
   replaceDocketEntries,
   updateCaseFields,
@@ -37,20 +39,18 @@ interface SampleFile {
 }
 
 const data = JSON.parse(fs.readFileSync("data/sample-cases.json", "utf8")) as SampleFile;
-const db = getDb();
 const sampleBrandKeys = new Set<string>();
 
-db.exec("BEGIN");
-try {
+async function main() {
   for (const b of data.brands) {
     const normalized = normalizeBrandKey(b.name);
     sampleBrandKeys.add(normalized);
-    upsertBrand({ ...b, normalized });
+    await upsertBrand({ ...b, normalized, isSample: true });
   }
 
   const now = new Date().toISOString();
   for (const c of data.cases) {
-    const id = upsertCaseRecord({
+    const id = await upsertCaseRecord({
       id: `sample-${c.slug}`,
       source: "sample",
       sourceId: c.slug,
@@ -63,7 +63,7 @@ try {
       natureOfSuit: c.natureOfSuit,
       isSample: true,
     });
-    updateCaseFields(id, {
+    await updateCaseFields(id, {
       status: c.status,
       summary: c.summary,
       whoQualifies: c.whoQualifies,
@@ -74,26 +74,28 @@ try {
       categories: c.categories,
       lastChecked: now,
     });
-    replaceDocketEntries(
+    await replaceDocketEntries(
       id,
       c.docketEntries.map((e) => ({ ...e, documentUrl: null })),
     );
-    db.prepare("DELETE FROM case_brands WHERE case_id = $id").run({ id });
+    await clearCaseBrands(id);
     for (const b of c.brands) {
       const key = normalizeBrandKey(b.name);
       // Guard: sample lawsuits may only ever link to the fictional sample brands.
       if (!sampleBrandKeys.has(key)) throw new Error(`Sample case ${c.slug} links non-sample brand ${b.name}`);
-      const brand = getBrandByNormalized(key)!;
-      linkCaseBrand(id, brand.id, "defendant", b.products);
+      const brand = (await getBrandByNormalized(key))!;
+      await linkCaseBrand(id, brand.id, "defendant", b.products);
     }
   }
-  db.exec("COMMIT");
-} catch (err) {
-  db.exec("ROLLBACK");
-  throw err;
+  const statuses = [...new Set(data.cases.map((c) => c.status))].join(", ");
+  console.log(
+    `Seeded ${data.cases.length} SAMPLE cases and ${data.brands.length} fictional brands (statuses: ${statuses})`,
+  );
 }
 
-const statuses = [...new Set(data.cases.map((c) => c.status))].join(", ");
-console.log(
-  `Seeded ${data.cases.length} SAMPLE cases and ${data.brands.length} fictional brands (statuses: ${statuses})`,
-);
+main()
+  .catch((err) => {
+    console.error(err instanceof Error ? err.message : err);
+    process.exitCode = 1;
+  })
+  .finally(closePool);

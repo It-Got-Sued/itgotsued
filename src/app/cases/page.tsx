@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { searchCases } from "@/lib/repo/cases";
 import { listBrands } from "@/lib/repo/brands";
-import { CaseList } from "@/components/CaseCard";
+import { CaseRows } from "@/components/CaseRows";
+import { lookupAndStoreCases } from "@/lib/ingest/live-lookup";
 import { CaseFilters, type FilterValues } from "@/components/CaseFilters";
 import { Pagination } from "@/components/Pagination";
 import { isCaseStatus, STATUS_INFO } from "@/components/status";
@@ -29,23 +30,30 @@ export default async function CasesPage({ searchParams }: { searchParams: Promis
   };
   const page = Math.max(1, Number.parseInt(one(sp.page), 10) || 1);
 
-  const result = (() => {
+  const params = {
+    q: values.q || undefined,
+    status: isCaseStatus(values.status) ? values.status : undefined,
+    state: values.state || undefined,
+    brand: values.brand || undefined,
+    page,
+    pageSize: PAGE_SIZE,
+  };
+  const { result, lookedUpLive } = await (async () => {
     try {
-      return searchCases({
-        q: values.q || undefined,
-        status: isCaseStatus(values.status) ? values.status : undefined,
-        state: values.state || undefined,
-        brand: values.brand || undefined,
-        page,
-        pageSize: PAGE_SIZE,
-      });
+      const first = await searchCases(params);
+      // Nothing in our index for a plain text search (e.g. a case name from a settlement
+      // email): ask CourtListener directly, store what it finds, and search again.
+      if (first.total === 0 && values.q && page === 1 && (await lookupAndStoreCases(values.q)) > 0) {
+        return { result: await searchCases(params), lookedUpLive: true };
+      }
+      return { result: first, lookedUpLive: false };
     } catch {
-      return null;
+      return { result: null, lookedUpLive: false };
     }
   })();
-  const brands = (() => {
+  const brands = await (async () => {
     try {
-      return listBrands().map((b) => ({ normalized: b.normalized, name: b.name }));
+      return (await listBrands()).map((b) => ({ normalized: b.normalized, name: b.name }));
     } catch {
       return null;
     }
@@ -107,8 +115,9 @@ export default async function CasesPage({ searchParams }: { searchParams: Promis
           <p className="text-sm text-muted" aria-live="polite">
             {result.total.toLocaleString("en-US")} lawsuit{result.total === 1 ? "" : "s"}
             {pageCount > 1 && ` · page ${Math.min(page, pageCount)} of ${pageCount}`}
+            {lookedUpLive && " · just fetched from federal court records"}
           </p>
-          <CaseList cases={result.cases} headingLevel={2} />
+          <CaseRows cases={result.cases} />
         </>
       )}
       {result && result.cases.length === 0 && page > 1 && pageCount > 0 && (

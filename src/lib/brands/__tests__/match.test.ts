@@ -1,13 +1,13 @@
 import { finish, test, eq, ok } from "./harness";
-import { seedFixtures } from "./fixtures";
-import { matchDetections, resolveBrandString } from "../match";
+import { fixtureIndex, fixtureOptions } from "./fixtures";
+import { type MatchOptions, matchDetections, resolveBrandString } from "../match";
 import type { BrandDetection } from "@/lib/types";
 
-seedFixtures();
+const match = (d: BrandDetection[], o: MatchOptions = {}) => matchDetections(d, fixtureOptions(o));
 const det = (brand: string, source: BrandDetection["source"] = "text", confidence = 0.9, product?: string): BrandDetection => ({
   brand, product, confidence, source,
 });
-const resolved = (s: string, source: BrandDetection["source"] = "text") => resolveBrandString(s, source)?.brand.name ?? null;
+const resolved = (s: string, source: BrandDetection["source"] = "text") => resolveBrandString(s, source, fixtureIndex)?.brand.name ?? null;
 
 console.log("resolution: exact / alias / compact / token");
 void test("exact name", () => eq(resolved("Nature Made"), "Nature Made"));
@@ -40,8 +40,8 @@ void test('"Samsara" does not match Samsung', () => eq(resolved("Samsara"), null
 void test('"Amazonia" does not match Amazon', () => eq(resolved("Amazonia"), null));
 
 console.log("matchDetections: parent company + merging + ranking");
-void test("Dasani detection surfaces The Coca-Cola Company case (relation parent)", () => {
-  const m = matchDetections([det("Dasani")]);
+void test("Dasani detection surfaces The Coca-Cola Company case (relation parent)", async () => {
+  const m = await match([det("Dasani")]);
   const parent = m.find((x) => x.brand.name === "The Coca-Cola Company");
   ok(parent, "parent match missing");
   eq(parent!.relation, "parent");
@@ -52,49 +52,49 @@ void test("Dasani detection surfaces The Coca-Cola Company case (relation parent
   eq(dasani.cases.map((c) => c.id).sort(), ["c-dasani", "c-shared"]);
   eq(m[0].brand.name, "The Coca-Cola Company", "claims_open first");
 });
-void test("Coke does not surface sibling Dasani, does surface parent", () => {
-  const names = matchDetections([det("Coke")]).map((x) => `${x.brand.name}:${x.relation}`);
+void test("Coke does not surface sibling Dasani, does surface parent", async () => {
+  const names = (await match([det("Coke")])).map((x) => `${x.brand.name}:${x.relation}`);
   ok(!names.some((n) => n.startsWith("Dasani")), `unexpected sibling: ${names}`);
   ok(names.includes("The Coca-Cola Company:parent"), `missing parent: ${names}`);
   ok(names.includes("Coca-Cola:direct"), `missing direct: ${names}`);
 });
-void test("company detection expands down to subsidiaries", () => {
-  const m = matchDetections([det("The Coca-Cola Company", "bank", 0.9)]);
+void test("company detection expands down to subsidiaries", async () => {
+  const m = await match([det("The Coca-Cola Company", "bank", 0.9)]);
   const sub = m.find((x) => x.brand.name === "Dasani");
   ok(sub, "subsidiary missing");
   eq(sub!.relation, "subsidiary");
 });
-void test("Crest (parent 'Procter & Gamble Co.') maps to Procter & Gamble", () => {
-  const m = matchDetections([det("Crest")]);
+void test("Crest (parent 'Procter & Gamble Co.') maps to Procter & Gamble", async () => {
+  const m = await match([det("Crest")]);
   eq(m.find((x) => x.brand.name === "Procter & Gamble")?.relation, "parent");
 });
-void test("duplicates merge per brand with noisy-OR confidence", () => {
-  const m = matchDetections([det("Coke", "photo", 0.6), det("Coca-Cola", "text", 0.6)]);
+void test("duplicates merge per brand with noisy-OR confidence", async () => {
+  const m = await match([det("Coke", "photo", 0.6), det("Coca-Cola", "text", 0.6)]);
   const coke = m.find((x) => x.brand.name === "Coca-Cola")!;
   eq(coke.detections.length, 2);
   ok(coke.confidence > 0.8, `confidence ${coke.confidence}`);
 });
-void test("low-confidence detections dropped", () => {
-  eq(matchDetections([det("Netflix", "photo", 0.3)]).length, 0);
+void test("low-confidence detections dropped", async () => {
+  eq((await match([det("Netflix", "photo", 0.3)])).length, 0);
 });
-void test("brands with zero cases are excluded (Dove)", () => {
-  const m = matchDetections([det("Dove")]);
+void test("brands with zero cases are excluded (Dove)", async () => {
+  const m = await match([det("Dove")]);
   ok(!m.some((x) => x.brand.name === "Dove"), "Dove has no cases");
   eq(m.map((x) => x.brand.name), ["Unilever"]);
 });
-void test("sort: claims_open first, then case count", () => {
-  const m = matchDetections([det("Peloton"), det("Amazon"), det("Nature Made")]);
+void test("sort: claims_open first, then case count", async () => {
+  const m = await match([det("Peloton"), det("Amazon"), det("Nature Made")]);
   eq(m.map((x) => x.brand.name), ["Amazon", "Nature Made", "Peloton"]);
   eq(m[0].brand.name, "Amazon");
   eq(m[0].cases[0].status, "claims_open");
 });
-void test("activeOnly drops dismissed/closed cases", () => {
-  eq(matchDetections([det("Netflix")]).length, 1);
-  eq(matchDetections([det("Netflix")], { activeOnly: true }).length, 0);
-  eq(matchDetections([det("Crest")], { activeOnly: true }).map((x) => x.brand.name), ["Procter & Gamble"]);
+void test("activeOnly drops dismissed/closed cases", async () => {
+  eq((await match([det("Netflix")])).length, 1);
+  eq((await match([det("Netflix")], { activeOnly: true })).length, 0);
+  eq((await match([det("Crest")], { activeOnly: true })).map((x) => x.brand.name), ["Procter & Gamble"]);
 });
-void test("product used when brand is unknown", () => {
-  eq(matchDetections([det("Unknown Co", "photo", 0.9, "Dasani water bottle")]).some((x) => x.brand.name === "Dasani"), true);
+void test("product used when brand is unknown", async () => {
+  eq((await match([det("Unknown Co", "photo", 0.9, "Dasani water bottle")])).some((x) => x.brand.name === "Dasani"), true);
 });
 
-setTimeout(finish, 0);
+void finish();

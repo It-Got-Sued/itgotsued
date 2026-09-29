@@ -80,9 +80,9 @@ export function stripCorporateSuffix(name: string): string {
   return s;
 }
 
-/** Key used to compare company names (parent-company mapping). */
+/** Key used to compare company names (parent-company mapping). "Amazon.com, Inc." -> "amazon". */
 export function companyKey(name: string): string {
-  return normalizeBrandKey(stripCorporateSuffix(name));
+  return normalizeBrandKey(stripCorporateSuffix(name)).replace(/-com$/, "");
 }
 
 /** Hyphen-free form so "Coca Cola", "CocaCola" and "Coca-Cola" collide. */
