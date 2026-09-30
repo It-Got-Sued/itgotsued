@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { CaseSummary } from "@/lib/types";
+import { NoProofBadge, paysWithoutProof } from "./NoProofBadge";
 import { StatusBadge } from "./StatusBadge";
 import { SampleBadge } from "./SampleBadge";
 import { daysUntil, formatDate } from "./format";
@@ -36,6 +37,7 @@ export function CaseCard({ c, headingLevel = 3 }: { c: CaseSummary; headingLevel
       />
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <StatusBadge status={c.status} />
+        {paysWithoutProof(c) && <NoProofBadge />}
         {c.isSample && <SampleBadge />}
       </div>
       <H className="text-[1.05rem] font-semibold leading-snug">

@@ -39,8 +39,16 @@ export interface CaseSummary {
   brands: string[]; // display names of linked brands
   claimUrl: string | null;
   claimDeadline: string | null; // ISO date
+  /** Whether the settlement pays claims without a receipt, from the settlement filings. */
+  proofOfPurchase: ProofOfPurchase;
+  /** What a claim without proof pays, e.g. "$5 per product, up to $25". */
+  noProofPayout: string | null;
   isSample: boolean;
 }
+
+export type ProofOfPurchase = "not_required" | "required" | "unknown";
+
+export const PROOF_OF_PURCHASE: ProofOfPurchase[] = ["not_required", "required", "unknown"];
 
 export interface DocketEntry {
   entryNumber: number | null;
@@ -164,6 +172,7 @@ export interface CaseSearchParams {
   status?: CaseStatus;
   brand?: string; // normalized brand key
   state?: string; // two-letter code
+  proof?: ProofOfPurchase;
   page?: number; // 1-based
   pageSize?: number; // default 20
 }

@@ -2,7 +2,7 @@ import { z } from "zod";
 import { getTier } from "@/lib/auth/session";
 import { shieldSummary } from "@/lib/paywall";
 import { searchCases } from "@/lib/repo/cases";
-import { CASE_STATUSES, type CaseSearchParams, type CaseSearchResult } from "@/lib/types";
+import { CASE_STATUSES, PROOF_OF_PURCHASE, type CaseSearchParams, type CaseSearchResult } from "@/lib/types";
 
 export const runtime = "nodejs";
 
@@ -20,11 +20,12 @@ const Query = z.object({
     blank,
     z.string().trim().regex(/^[A-Za-z]{2}$/, "Use a two-letter state code").toUpperCase().optional(),
   ),
+  proof: z.preprocess(blank, z.enum(PROOF_OF_PURCHASE as [string, ...string[]]).optional()),
   page: z.preprocess(blank, z.coerce.number().int().min(1).max(10_000).optional()),
   pageSize: z.preprocess(blank, z.coerce.number().int().min(1).max(100).optional()),
 });
 
-// GET /api/cases?q=&status=&brand=&state=&page=&pageSize= -> CaseSearchResult
+// GET /api/cases?q=&status=&brand=&state=&proof=&page=&pageSize= -> CaseSearchResult
 export async function GET(request: Request) {
   const sp = new URL(request.url).searchParams;
   const parsed = Query.safeParse({
@@ -32,6 +33,7 @@ export async function GET(request: Request) {
     status: sp.get("status"),
     brand: sp.get("brand"),
     state: sp.get("state"),
+    proof: sp.get("proof"),
     page: sp.get("page"),
     pageSize: sp.get("pageSize"),
   });

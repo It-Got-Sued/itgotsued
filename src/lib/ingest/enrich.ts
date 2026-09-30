@@ -49,6 +49,8 @@ export const MAX_SUMMARY_WORDS = 200;
 const COMPLAINT_CHARS = 100_000;
 const OTHER_FILING_CHARS = 30_000;
 const MAX_OTHER_FILINGS = 3;
+/** Settlement filings read alongside the complaint, for the claim terms (proof of purchase). */
+const MAX_SETTLEMENT_FILINGS = 2;
 
 // claims_open is deliberately excluded: we only mark a case claims_open when we have the
 // official claim URL, which filings alone do not give us.
@@ -104,6 +106,17 @@ export const EnrichmentSchema = z.object({
     .describe("Two-letter state codes the class is limited to; empty if nationwide or unclear."),
   status_guess: z.enum(STATUS_GUESSES),
   settlement_amount: z.string().nullable().describe("Settlement amount if one is stated, else null."),
+  proof_of_purchase: z
+    .enum(["not_required", "required", "unknown"])
+    .describe(
+      "From settlement terms only (settlement agreement, class notice, claim form, approval motion or order). not_required: class members can be paid without a receipt or other proof of purchase, for example by signing an attestation, even if proof unlocks a larger payment. required: every claim needs proof of purchase. unknown: the filings do not state settlement claim terms. A complaint alone is always unknown.",
+    ),
+  no_proof_payout: z
+    .string()
+    .nullable()
+    .describe(
+      "When proof_of_purchase is not_required: what a claim without proof pays, as the settlement states it, e.g. '$5 per product, up to $25 per household'. Otherwise null.",
+    ),
 });
 
 export type Enrichment = z.infer<typeof EnrichmentSchema>;
@@ -195,6 +208,31 @@ async function refreshFromCourtListener(
 }
 
 const SETTLEMENT_RE = /\b(settlement|approval|class certification|certify|notice to (the )?class|fairness)\b/i;
+/** Filings likely to state claim terms: settlement agreements, notices, claim forms, approval orders. */
+const SETTLEMENT_TERMS_RE = /\b(settlement|notice to (the )?class|claim form)\b/i;
+
+/** Up to MAX_SETTLEMENT_FILINGS stored settlement filings with PDFs, newest first. No API calls. */
+async function readSettlementFilings(c: EnrichmentCandidate): Promise<Filing[]> {
+  const entries = c.docketEntries
+    .filter(
+      (e) =>
+        e.documentUrl?.startsWith(CL_STORAGE) &&
+        e.documentUrl !== c.complaintUrl &&
+        SETTLEMENT_TERMS_RE.test(e.description),
+    )
+    .sort((a, b) => (b.entryNumber ?? 0) - (a.entryNumber ?? 0))
+    .slice(0, MAX_SETTLEMENT_FILINGS);
+  const filings: Filing[] = [];
+  for (const e of entries) {
+    const pdf = await readPdf(e.documentUrl!);
+    if (!pdf) continue;
+    filings.push({
+      title: `Docket entry ${e.entryNumber ?? "?"}: ${e.description.slice(0, 200)}`,
+      text: selectExcerpts(pdf.text, OTHER_FILING_CHARS).text,
+    });
+  }
+  return filings;
+}
 
 async function readPdf(url: string): Promise<{ text: string; pageCount: number } | null> {
   try {
@@ -216,7 +254,7 @@ async function gatherFilings(
     if (pdf) {
       const { text, truncated } = selectExcerpts(pdf.text, COMPLAINT_CHARS);
       return {
-        filings: [{ title: "Complaint", text }],
+        filings: [{ title: "Complaint", text }, ...(await readSettlementFilings(c))],
         complaint: { url: c.complaintUrl, text, pageCount: pdf.pageCount, textChars: pdf.text.length, truncated },
       };
     }
@@ -301,6 +339,13 @@ export async function applyEnrichment(c: EnrichmentCandidate, e: Enrichment): Pr
     categories: e.categories.map((s) => s.trim().toLowerCase()).filter(Boolean).slice(0, 6),
     states,
     settlementAmount: e.settlement_amount?.trim() || null,
+    // Settlement terms are often in filings a later run does not read; keep what an earlier run found.
+    ...(e.proof_of_purchase !== "unknown"
+      ? {
+          proofOfPurchase: e.proof_of_purchase,
+          noProofPayout: e.proof_of_purchase === "not_required" ? e.no_proof_payout?.trim() || null : null,
+        }
+      : {}),
     ...(canUpdateStatus ? { status: e.status_guess as CaseStatus } : {}),
     lastChecked: new Date().toISOString(),
     enrichedAt: new Date().toISOString(),

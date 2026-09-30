@@ -7,8 +7,8 @@ import type { Tier } from "@/lib/tiers";
 
 export function shieldSummary<T extends CaseSummary>(c: T, tier: Tier): T {
   if (tier === "pro") return c;
-  if (tier === "free") return { ...c, claimUrl: null };
-  return { ...c, summary: null, claimUrl: null, claimDeadline: null };
+  if (tier === "free") return { ...c, claimUrl: null, noProofPayout: null };
+  return { ...c, summary: null, claimUrl: null, claimDeadline: null, noProofPayout: null };
 }
 
 export function shieldDetail(c: CaseDetail, tier: Tier): CaseDetail {

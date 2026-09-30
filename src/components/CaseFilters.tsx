@@ -1,6 +1,6 @@
 import Form from "next/form";
 import Link from "next/link";
-import { CASE_STATUSES } from "@/lib/types";
+import { CASE_STATUSES, PROOF_OF_PURCHASE, type ProofOfPurchase } from "@/lib/types";
 import { STATUS_INFO } from "./status";
 import { US_STATES } from "./format";
 
@@ -9,6 +9,17 @@ export interface FilterValues {
   status: string;
   state: string;
   brand: string;
+  proof: string;
+}
+
+export const PROOF_LABELS: Record<ProofOfPurchase, string> = {
+  not_required: "No proof needed",
+  required: "Proof required",
+  unknown: "Not known yet",
+};
+
+export function isProofOfPurchase(v: unknown): v is ProofOfPurchase {
+  return typeof v === "string" && v in PROOF_LABELS;
 }
 
 export function CaseFilters({
@@ -19,8 +30,8 @@ export function CaseFilters({
   brands: { normalized: string; name: string }[] | null;
 }) {
   return (
-    <Form action="/cases" role="search" className="card grid gap-4 p-5 sm:grid-cols-2 sm:p-6 lg:grid-cols-4">
-      <div className="sm:col-span-2 lg:col-span-4">
+    <Form action="/cases" role="search" className="card grid gap-4 p-5 sm:grid-cols-2 sm:p-6 lg:grid-cols-5">
+      <div className="sm:col-span-2 lg:col-span-5">
         <label htmlFor="f-q" className="mb-1 block text-sm font-medium">Search</label>
         <input id="f-q" name="q" type="search" defaultValue={values.q} className="input" placeholder="Company, product, or case name" />
       </div>
@@ -57,6 +68,15 @@ export function CaseFilters({
         ) : (
           <input id="f-brand" name="brand" defaultValue={values.brand} className="input" placeholder="e.g. coca-cola" />
         )}
+      </div>
+      <div>
+        <label htmlFor="f-proof" className="mb-1 block text-sm font-medium">Proof of purchase</label>
+        <select id="f-proof" name="proof" defaultValue={values.proof} className="input">
+          <option value="">Any</option>
+          {PROOF_OF_PURCHASE.map((p) => (
+            <option key={p} value={p}>{PROOF_LABELS[p]}</option>
+          ))}
+        </select>
       </div>
       <div className="flex items-end gap-2">
         <button type="submit" className="btn-primary flex-1">Apply filters</button>

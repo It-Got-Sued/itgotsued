@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 import { getCase } from "@/lib/repo/cases";
 import { normalizeBrandKey } from "@/lib/repo/brands";
+import { NoProofBadge, paysWithoutProof } from "@/components/NoProofBadge";
 import { StatusBadge } from "@/components/StatusBadge";
 import { SampleBadge, SampleBanner } from "@/components/SampleBadge";
 import { STATUS_INFO, TONE_ACCENT, TONE_CLASSES, TONE_DOT } from "@/components/status";
@@ -123,6 +124,7 @@ export default async function CasePage({ params }: Props) {
             </Link>
             <div className="flex flex-wrap items-center gap-2">
               <StatusBadge status={c.status} />
+              {paysWithoutProof(c) && <NoProofBadge />}
               {c.isSample && <SampleBadge />}
             </div>
             <div className="flex flex-wrap items-start justify-between gap-4">

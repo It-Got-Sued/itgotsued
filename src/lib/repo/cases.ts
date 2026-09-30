@@ -7,13 +7,14 @@ import type {
   CaseStatus,
   CaseSummary,
   DocketEntry,
+  ProofOfPurchase,
 } from "@/lib/types";
 
 type Row = Record<string, unknown>;
 
 const SUMMARY_COLUMNS = `
   c.id, c.case_name, c.court, c.docket_number, c.date_filed, c.status, c.summary,
-  c.claim_url, c.claim_deadline, c.is_sample,
+  c.claim_url, c.claim_deadline, c.proof_of_purchase, c.no_proof_payout, c.is_sample,
   COALESCE((SELECT array_agg(b.name ORDER BY b.name) FROM case_brands cb
             JOIN brands b ON b.id = cb.brand_id WHERE cb.case_id = c.id), '{}') AS brand_names
 `;
@@ -33,6 +34,8 @@ function toSummary(r: Row): CaseSummary {
     brands: (r.brand_names as string[]) ?? [],
     claimUrl: (r.claim_url as string) ?? null,
     claimDeadline: iso(r.claim_deadline),
+    proofOfPurchase: (r.proof_of_purchase as ProofOfPurchase) ?? "unknown",
+    noProofPayout: (r.no_proof_payout as string) ?? null,
     isSample: Boolean(r.is_sample),
   };
 }
@@ -74,6 +77,7 @@ export async function searchCases(params: CaseSearchParams): Promise<CaseSearchR
     );
   }
   if (params.state) w.clauses.push(`${w.arg(params.state.toUpperCase())} = ANY(c.states)`);
+  if (params.proof) w.clauses.push(`c.proof_of_purchase = ${w.arg(params.proof)}`);
 
   const pageSize = Math.min(Math.max(params.pageSize ?? 20, 1), 100);
   const page = Math.max(params.page ?? 1, 1);

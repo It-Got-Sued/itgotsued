@@ -11,10 +11,10 @@ Every write to the database must be idempotent so re-running ingest never create
 
 # Case summaries: AI enrichment
 
-`npm run enrich` fills each case's `summary` (200 words max, shown in the case page's Summary section), `who_qualifies`, brands, categories, states and settlement amount, and saves a `complaint_analyses` row when the complaint PDF is readable.
+`npm run enrich` fills each case's `summary` (200 words max, shown in the case page's Summary section), `who_qualifies`, brands, categories, states, settlement amount and proof-of-purchase terms (`proof_of_purchase`, `no_proof_payout`), and saves a `complaint_analyses` row when the complaint PDF is readable.
 
 - Model: DeepSeek `deepseek-v4-pro` through `DEEPSEEK_API_KEY` in `.env`. Model ids are `<provider>/<model>`; `deepseek/...` calls DeepSeek directly and anything else goes through the Vercel AI Gateway (`src/lib/ingest/ai.ts`). Override with `ENRICH_MODEL`, `COMPLAINT_SUMMARY_MODEL` or `--model`. The AI Gateway account is on the free tier and rejects Claude models.
-- Filings read: the complaint PDF (`cases.complaint_url`, on storage.courtlistener.com). When a case has no complaint URL, enrich first fetches its docket entries from CourtListener, then reads up to 3 other filings with PDFs, settlement filings first. The CourtListener docket API allows about 125 requests a day, so enrich stops calling it for the rest of a run after any HTTP error.
+- Filings read: the complaint PDF (`cases.complaint_url`, on storage.courtlistener.com), plus up to 2 stored settlement filings with PDFs for the claim terms. `proof_of_purchase` is only overwritten when the model finds the terms. When a case has no complaint URL, enrich first fetches its docket entries from CourtListener, then reads up to 3 other filings with PDFs, settlement filings first. The CourtListener docket API allows about 125 requests a day, so enrich stops calling it for the rest of a run after any HTTP error.
 - Only cases with `enriched_at IS NULL` are picked up. Use `--id <case id>` or `--force` to redo a case.
 - The site lists only suits against a company or brand. The model labels each defendant `company`, `person`, `government` or `other`; only `company` defendants are linked as brands, and enrich deletes a case with no company defendant (person v. person, suits against a government). A deleted case can come back through ingest and is then enriched and deleted again.
 - Enrich only changes `status` on cases that are `filed` or `unknown`. It never sets `claims_open`.

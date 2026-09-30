@@ -18,6 +18,9 @@ function message(n: ClaimsOpenNotice): { subject: string; text: string } {
     text: [
       `The settlement claim form for ${n.caseName} is now open.`,
       ...(deadline ? [`Claims are due by ${deadline}.`] : []),
+      ...(n.proofOfPurchase === "not_required"
+        ? [`No proof of purchase needed${n.noProofPayout ? `: claims without a receipt get ${n.noProofPayout}` : ""}.`]
+        : []),
       "",
       "See who qualifies and how to file a claim:",
       url,
