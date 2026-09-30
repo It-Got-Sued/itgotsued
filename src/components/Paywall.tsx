@@ -23,7 +23,7 @@ export async function Paywall({
   const pitch =
     min === "free"
       ? "Create a free account to see plain-English summaries and claim deadlines, and to check what you own."
-      : `Pro unlocks who qualifies, official claim links, court filings, photo and bank scans, My Items, and brand alerts for ${price}. Cancel anytime.`;
+      : `Pro unlocks who qualifies, official claim links, court filings, photo and bank scans, and My Items for ${price}. Cancel anytime.`;
 
   return (
     <section className="card space-y-3 bg-surface-muted p-6">

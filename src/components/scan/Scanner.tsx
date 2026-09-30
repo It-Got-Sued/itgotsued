@@ -278,7 +278,7 @@ function ProOnly({ what }: { what: string }) {
   return (
     <div className="space-y-3 rounded-2xl border-2 border-border bg-surface-muted p-5">
       <p className="font-bold">{what} are part of It Got Sued Pro.</p>
-      <p className="text-sm text-muted">Upgrade for unlimited scans, claim links, who qualifies, and brand alerts.</p>
+      <p className="text-sm text-muted">Upgrade for unlimited scans, claim links, and who qualifies.</p>
       <Link href="/pricing" className="btn-primary">See plans</Link>
     </div>
   );

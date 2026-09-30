@@ -35,5 +35,5 @@ export const PLAN_FEATURES: { label: string; free: boolean | string; pro: boolea
   { label: "Complaint analysis and court filings", free: false, pro: true },
   { label: "Photo and bank scans", free: false, pro: true },
   { label: "My Items list", free: false, pro: true },
-  { label: "Brand alerts by email", free: false, pro: true },
+  { label: "Follow cases and get an email when claims open", free: true, pro: true },
 ];

@@ -14,10 +14,12 @@ import { ApplyPanel } from "@/components/case/ApplyPanel";
 import { ComplaintAnalysis } from "@/components/case/ComplaintAnalysis";
 import { ComplaintViewer } from "@/components/case/ComplaintViewer";
 import { DocketTable } from "@/components/case/DocketTable";
-import { FollowBrand } from "@/components/case/FollowBrand";
+import { FollowButton } from "@/components/case/FollowButton";
 import { SITE_NAME, SITE_URL, jsonLd, pageMetadata } from "@/lib/seo";
 import type { CaseDetail } from "@/lib/types";
-import { getTier } from "@/lib/auth/session";
+import { getCurrentUser } from "@/lib/auth/session";
+import { isFollowingCase } from "@/lib/repo/case-follows";
+import { tierOf } from "@/lib/tiers";
 import { shieldDetail } from "@/lib/paywall";
 import { Paywall } from "@/components/Paywall";
 
@@ -85,8 +87,10 @@ export default async function CasePage({ params }: Props) {
   if (!found) notFound();
 
   // Strip what this tier can't see before rendering, so nothing leaks into the page payload.
-  const tier = await getTier();
+  const user = await getCurrentUser();
+  const tier = tierOf(user);
   const c = shieldDetail(found, tier);
+  const following = user ? await isFollowingCase(user.id, c.id) : false;
   const pro = tier === "pro";
   const casePath = `/cases/${encodeURIComponent(c.id)}`;
   const status = STATUS_INFO[c.status] ?? STATUS_INFO.unknown;
@@ -121,7 +125,10 @@ export default async function CasePage({ params }: Props) {
               <StatusBadge status={c.status} />
               {c.isSample && <SampleBadge />}
             </div>
-            <h1 className="text-3xl font-extrabold leading-tight sm:text-4xl">{c.caseName}</h1>
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <h1 className="min-w-0 text-3xl font-extrabold leading-tight sm:text-4xl">{c.caseName}</h1>
+              <FollowButton caseId={c.id} initialFollowing={following} signedIn={!!user} next={casePath} />
+            </div>
             <dl className="grid gap-3 pt-2 sm:grid-cols-2 lg:grid-cols-3">
               {facts
                 .filter(([, v]) => v)
@@ -224,11 +231,6 @@ export default async function CasePage({ params }: Props) {
 
         <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
           {tier !== "anonymous" && <ApplyPanel c={c} />}
-          {pro && (
-            <div className="card p-6">
-              <FollowBrand brands={c.brands} />
-            </div>
-          )}
         </aside>
       </div>
     </article>

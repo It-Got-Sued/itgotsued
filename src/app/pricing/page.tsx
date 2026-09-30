@@ -9,7 +9,7 @@ import { PLAN_FEATURES } from "@/lib/tiers";
 export const metadata: Metadata = pageMetadata({
   title: "Pricing: Free and Pro Plans",
   description:
-    "Search class action lawsuits free. Upgrade to It Got Sued Pro for who qualifies, official claim links, court filings, photo and bank scans, and brand alerts.",
+    "Search class action lawsuits free. Upgrade to It Got Sued Pro for who qualifies, official claim links, court filings, and photo and bank scans.",
   path: "/pricing",
 });
 
