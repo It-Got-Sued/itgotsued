@@ -64,6 +64,8 @@ const summary = (id: string, caseName: string, status: CaseStatus, dateFiled: st
   brands: brandIds.map((b) => fixtureIndex.byId.get(b)?.name ?? b),
   claimUrl: null,
   claimDeadline: null,
+  proofOfPurchase: "unknown",
+  noProofPayout: null,
   isSample: true,
 });
 

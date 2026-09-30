@@ -1,6 +1,7 @@
 import type { CaseDetail } from "@/lib/types";
 import { daysUntil, formatDate, safeUrl } from "../format";
 import { ExternalLinkNotice } from "../ExternalLinkNotice";
+import { paysWithoutProof } from "../NoProofBadge";
 import { AddToCalendar } from "./AddToCalendar";
 
 /** Settlement facts, the Apply button (claims_open + claimUrl only), and calendar export. */
@@ -8,7 +9,7 @@ export function ApplyPanel({ c }: { c: CaseDetail }) {
   const claimUrl = safeUrl(c.claimUrl);
   const canApply = c.status === "claims_open" && !!claimUrl;
   const days = daysUntil(c.claimDeadline);
-  const hasFacts = c.settlementAmount || c.claimDeadline;
+  const hasFacts = c.settlementAmount || c.claimDeadline || paysWithoutProof(c);
   if (!hasFacts && !canApply) return null;
 
   return (
@@ -28,6 +29,14 @@ export function ApplyPanel({ c }: { c: CaseDetail }) {
           <div>
             <dt className="text-muted">Settlement amount</dt>
             <dd className="font-display text-2xl font-bold">{c.settlementAmount}</dd>
+          </div>
+        )}
+        {paysWithoutProof(c) && (
+          <div>
+            <dt className="text-muted">Proof of purchase</dt>
+            <dd className="font-semibold">
+              Not needed{c.noProofPayout && <span className="block font-normal">Claims without a receipt: {c.noProofPayout}</span>}
+            </dd>
           </div>
         )}
         {c.claimDeadline && (

@@ -1,4 +1,5 @@
 import { query, queryOne, transaction } from "@/lib/db";
+import type { ProofOfPurchase } from "@/lib/types";
 
 export async function isFollowingCase(userId: string, caseId: string): Promise<boolean> {
   return !!(await queryOne("SELECT 1 FROM case_follows WHERE user_id = $1 AND case_id = $2", [userId, caseId]));
@@ -33,6 +34,8 @@ export type ClaimsOpenNotice = {
   caseId: string;
   caseName: string;
   claimDeadline: string | null;
+  proofOfPurchase: ProofOfPurchase;
+  noProofPayout: string | null;
 };
 
 /** Followers of cases whose claims are open and who have not been emailed about it yet. */
@@ -43,8 +46,10 @@ export async function pendingClaimsOpenNotices(): Promise<ClaimsOpenNotice[]> {
     case_id: string;
     case_name: string;
     claim_deadline: string | null;
+    proof_of_purchase: ProofOfPurchase;
+    no_proof_payout: string | null;
   }>(
-    `SELECT u.id AS user_id, u.email, c.id AS case_id, c.case_name, c.claim_deadline
+    `SELECT u.id AS user_id, u.email, c.id AS case_id, c.case_name, c.claim_deadline, c.proof_of_purchase, c.no_proof_payout
      FROM case_follows f
      JOIN users u ON u.id = f.user_id
      JOIN cases c ON c.id = f.case_id
@@ -62,6 +67,8 @@ export async function pendingClaimsOpenNotices(): Promise<ClaimsOpenNotice[]> {
     caseId: r.case_id,
     caseName: r.case_name,
     claimDeadline: r.claim_deadline,
+    proofOfPurchase: r.proof_of_purchase,
+    noProofPayout: r.no_proof_payout,
   }));
 }
 

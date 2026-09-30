@@ -1,6 +1,6 @@
 // Write-side helpers for ingestion, enrichment and seeding. Additive to cases.ts/brands.ts.
 import { query, queryOne } from "@/lib/db";
-import type { Brand, CaseStatus, DocketEntry } from "@/lib/types";
+import type { Brand, CaseStatus, DocketEntry, ProofOfPurchase } from "@/lib/types";
 import { toBrand } from "./brands";
 
 type Row = Record<string, unknown>;
@@ -90,6 +90,8 @@ const FIELD_COLUMNS = {
   complaintUrl: "complaint_url",
   claimDeadline: "claim_deadline",
   settlementAmount: "settlement_amount",
+  proofOfPurchase: "proof_of_purchase",
+  noProofPayout: "no_proof_payout",
   states: "states",
   categories: "categories",
   lastChecked: "last_checked",
@@ -107,6 +109,8 @@ export async function updateCaseFields(
     complaintUrl: string | null;
     claimDeadline: string | null;
     settlementAmount: string | null;
+    proofOfPurchase: ProofOfPurchase;
+    noProofPayout: string | null;
     states: string[];
     categories: string[];
     lastChecked: string | null;

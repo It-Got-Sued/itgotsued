@@ -49,6 +49,8 @@ export const MAX_SUMMARY_WORDS = 200;
 const COMPLAINT_CHARS = 100_000;
 const OTHER_FILING_CHARS = 30_000;
 const MAX_OTHER_FILINGS = 3;
+/** Settlement exhibits and filings read for the claim terms (proof of purchase). */
+const MAX_SETTLEMENT_FILINGS = 2;
 
 // claims_open is deliberately excluded: we only mark a case claims_open when we have the
 // official claim URL, which filings alone do not give us.
@@ -104,6 +106,17 @@ export const EnrichmentSchema = z.object({
     .describe("Two-letter state codes the class is limited to; empty if nationwide or unclear."),
   status_guess: z.enum(STATUS_GUESSES),
   settlement_amount: z.string().nullable().describe("Settlement amount if one is stated, else null."),
+  proof_of_purchase: z
+    .enum(["not_required", "required", "unknown"])
+    .describe(
+      "From settlement terms only (settlement agreement, class notice, claim form, approval motion or order). not_required: class members can be paid without a receipt or other proof of purchase, for example by signing an attestation, even if proof unlocks a larger payment. required: every claim needs proof of purchase. unknown: the filings do not state settlement claim terms. A complaint alone is always unknown.",
+    ),
+  no_proof_payout: z
+    .string()
+    .nullable()
+    .describe(
+      "When proof_of_purchase is not_required: what a claim without proof pays, as the settlement states it, e.g. '$5 per product, up to $25 per household'. Otherwise null.",
+    ),
 });
 
 export type Enrichment = z.infer<typeof EnrichmentSchema>;
@@ -195,6 +208,107 @@ async function refreshFromCourtListener(
 }
 
 const SETTLEMENT_RE = /\b(settlement|approval|class certification|certify|notice to (the )?class|fairness)\b/i;
+/** Filings likely to state claim terms: settlement agreements, notices, claim forms, approval orders. */
+const SETTLEMENT_TERMS_RE = /\b(settlement|notice to (the )?class|claim form)\b/i;
+/** Docket activity showing a class settlement exists, so its exhibits are worth a search. */
+const SETTLEMENT_ACTIVITY_RE = /\b(preliminary approval|final approval|settlement agreement|class (action )?settlement)\b/i;
+
+/** Exhibit searches go out anonymously, so they do not use the token's daily docket quota. */
+let exhibitSearch: CourtListenerClient | null = null;
+let exhibitSearchOff = false;
+
+/**
+ * Settlement exhibits (agreement, claim form, notice) found by CourtListener search. Attachments
+ * are not stored in docket_entries, and they are where claim terms such as proof of purchase live.
+ */
+async function findClaimTermExhibits(
+  c: EnrichmentCandidate,
+  log: (msg: string) => void,
+): Promise<{ title: string; url: string }[]> {
+  const docketId = c.id.startsWith("cl-") ? Number(c.id.slice(3)) : NaN;
+  const settled =
+    ["settlement_pending", "claims_open", "claims_closed"].includes(c.status) ||
+    c.docketEntries.some((e) => SETTLEMENT_ACTIVITY_RE.test(e.description));
+  if (exhibitSearchOff || !settled || !Number.isInteger(docketId)) return [];
+  exhibitSearch ??= new CourtListenerClient({ maxRetries: 1 });
+  try {
+    return (await exhibitSearch.claimTermExhibits(docketId)).map((d) => ({
+      title: `Docket entry ${d.entry_number ?? "?"}, ${d.short_description || `attachment ${d.attachment_number}`}`,
+      url: `${CL_STORAGE}/${d.filepath_local}`,
+    }));
+  } catch (err) {
+    if (err instanceof ClHttpError) {
+      exhibitSearchOff = true;
+      log(`  CourtListener exhibit search stopped for this run (HTTP ${err.status}).`);
+      return [];
+    }
+    throw err;
+  }
+}
+
+/**
+ * Up to MAX_SETTLEMENT_FILINGS filings for the claim terms: settlement exhibits first, then
+ * stored settlement filings with PDFs, newest first. Skips the URLs in `exclude`.
+ */
+async function readSettlementFilings(
+  c: EnrichmentCandidate,
+  exclude: Set<string>,
+  log: (msg: string) => void,
+): Promise<Filing[]> {
+  const stored = c.docketEntries
+    .filter((e) => e.documentUrl?.startsWith(CL_STORAGE) && SETTLEMENT_TERMS_RE.test(e.description))
+    .sort((a, b) => (b.entryNumber ?? 0) - (a.entryNumber ?? 0))
+    .map((e) => ({
+      title: `Docket entry ${e.entryNumber ?? "?"}: ${e.description.slice(0, 200)}`,
+      url: e.documentUrl!,
+    }));
+  const filings: Filing[] = [];
+  for (const f of [...(await findClaimTermExhibits(c, log)), ...stored]) {
+    if (filings.length >= MAX_SETTLEMENT_FILINGS) break;
+    if (exclude.has(f.url)) continue;
+    exclude.add(f.url);
+    const pdf = await readPdf(f.url);
+    if (!pdf) continue;
+    filings.push({ title: f.title, text: selectClaimTermExcerpts(pdf.text, OTHER_FILING_CHARS) });
+  }
+  return filings;
+}
+
+/** Passages that state what a claim pays and what it needs, most decisive first. */
+const CLAIM_TERM_PASSAGES = [
+  /proof of purchase|without (a )?(receipt|proof)|documentation|attest(ation|s)?\b|penalty of perjury|claim form will/gi,
+  /per (household|device|product|unit|item|claimant|class member)|cash (payment|award)|valid claim|settlement benefits?/gi,
+  /claim form|claims? (deadline|period)/gi,
+];
+
+/**
+ * Settlement filings run to hundreds of pages. Keep the opening (parties, class definition) and
+ * the passages around claim terms, up to `budget` characters.
+ */
+export function selectClaimTermExcerpts(text: string, budget: number): string {
+  if (text.length <= budget) return text;
+  const ranges: [number, number][] = [[0, Math.floor(budget * 0.15)]];
+  const size = (rs: [number, number][]) => rs.reduce((n, [s, e]) => n + (e - s), 0);
+  const merge = (rs: [number, number][]) => {
+    const sorted = [...rs].sort((a, b) => a[0] - b[0]);
+    const out: [number, number][] = [];
+    for (const [s, e] of sorted) {
+      const last = out[out.length - 1];
+      if (last && s <= last[1]) last[1] = Math.max(last[1], e);
+      else out.push([s, e]);
+    }
+    return out;
+  };
+  let merged = merge(ranges);
+  outer: for (const re of CLAIM_TERM_PASSAGES) {
+    for (const m of text.matchAll(re)) {
+      const next = merge([...merged, [Math.max(0, m.index - 1_200), Math.min(text.length, m.index + 2_000)]]);
+      if (size(next) > budget) break outer;
+      merged = next;
+    }
+  }
+  return merged.map(([s, e]) => text.slice(s, e)).join("\n\n[... omitted ...]\n\n");
+}
 
 async function readPdf(url: string): Promise<{ text: string; pageCount: number } | null> {
   try {
@@ -210,13 +324,14 @@ async function readPdf(url: string): Promise<{ text: string; pageCount: number }
 async function gatherFilings(
   c: EnrichmentCandidate,
   docs: ClRecapDocument[],
+  log: (msg: string) => void,
 ): Promise<{ filings: Filing[]; complaint: ComplaintText | null }> {
   if (c.complaintUrl) {
     const pdf = await readPdf(c.complaintUrl);
     if (pdf) {
       const { text, truncated } = selectExcerpts(pdf.text, COMPLAINT_CHARS);
       return {
-        filings: [{ title: "Complaint", text }],
+        filings: [{ title: "Complaint", text }, ...(await readSettlementFilings(c, new Set([c.complaintUrl]), log))],
         complaint: { url: c.complaintUrl, text, pageCount: pdf.pageCount, textChars: pdf.text.length, truncated },
       };
     }
@@ -230,14 +345,18 @@ async function gatherFilings(
     )
     .slice(0, MAX_OTHER_FILINGS);
   const filings: Filing[] = [];
+  const read = new Set(c.complaintUrl ? [c.complaintUrl] : []);
   for (const d of others) {
-    const pdf = await readPdf(`${CL_STORAGE}/${d.filepath_local}`);
+    const url = `${CL_STORAGE}/${d.filepath_local}`;
+    read.add(url);
+    const pdf = await readPdf(url);
     if (!pdf) continue;
     filings.push({
       title: `Docket entry ${d.entry_number ?? "?"}: ${d.description || "filing"}`,
       text: selectExcerpts(pdf.text, OTHER_FILING_CHARS).text,
     });
   }
+  filings.push(...(await readSettlementFilings(c, read, log)));
   return { filings, complaint: null };
 }
 
@@ -301,6 +420,13 @@ export async function applyEnrichment(c: EnrichmentCandidate, e: Enrichment): Pr
     categories: e.categories.map((s) => s.trim().toLowerCase()).filter(Boolean).slice(0, 6),
     states,
     settlementAmount: e.settlement_amount?.trim() || null,
+    // Settlement terms are often in filings a later run does not read; keep what an earlier run found.
+    ...(e.proof_of_purchase !== "unknown"
+      ? {
+          proofOfPurchase: e.proof_of_purchase,
+          noProofPayout: e.proof_of_purchase === "not_required" ? e.no_proof_payout?.trim() || null : null,
+        }
+      : {}),
     ...(canUpdateStatus ? { status: e.status_guess as CaseStatus } : {}),
     lastChecked: new Date().toISOString(),
     enrichedAt: new Date().toISOString(),
@@ -383,7 +509,7 @@ export async function enrichPending(opts: EnrichOptions) {
       let complaint: ComplaintText | null = null;
       if (opts.includePdf ?? true) {
         const docs = c.complaintUrl ? [] : await refreshFromCourtListener(c, log);
-        ({ filings, complaint } = await gatherFilings(c, docs));
+        ({ filings, complaint } = await gatherFilings(c, docs, log));
       }
       const e = await extractEnrichment(c, filings, { model });
       if (!e.is_class_action && opts.prune) {

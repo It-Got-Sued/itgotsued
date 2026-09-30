@@ -65,6 +65,7 @@ export interface ClRecapDocument {
   entry_date_filed: string | null;
   filepath_local: string | null;
   is_available: boolean | null;
+  page_count?: number | null;
 }
 
 export interface ClSearchDocket {
@@ -166,6 +167,29 @@ export class CourtListenerClient {
     return this.get<ClSearchPage>("/search/", { type: "r", ...params });
   }
 
+  /** Individual RECAP documents (main filings and attachments) matching `q`. */
+  searchDocuments(q: string): Promise<{ results: ClRecapDocument[] }> {
+    return this.get("/search/", { type: "rd", q });
+  }
+
+  /**
+   * A docket's exhibits that state settlement claim terms (settlement agreement, claim form,
+   * class notice) and have a stored PDF: agreements first, then claim forms, then notices,
+   * newest filing first within each. One search request; no docket API quota.
+   */
+  async claimTermExhibits(docketId: number): Promise<ClRecapDocument[]> {
+    const { results } = await this.searchDocuments(
+      `docket_id:${docketId} AND attachment_number:[1 TO *] AND short_description:(settlement OR notice OR claim)`,
+    );
+    return (results ?? [])
+      .filter((d) => d.filepath_local && claimTermRank(d.short_description ?? "") < CLAIM_TERM_KINDS.length)
+      .sort(
+        (a, b) =>
+          claimTermRank(a.short_description ?? "") - claimTermRank(b.short_description ?? "") ||
+          (b.entry_number ?? 0) - (a.entry_number ?? 0),
+      );
+  }
+
   docket(id: number): Promise<Record<string, unknown>> {
     return this.get(`/dockets/${id}/`);
   }
@@ -177,6 +201,20 @@ export class CourtListenerClient {
       page_size: String(pageSize),
     });
   }
+}
+
+const CLAIM_TERM_KINDS = [
+  /\b(settlement agreement|stipulation of settlement|agreement of settlement)\b/i,
+  /\bclaim form\b/i,
+  /\bnotice\b/i,
+];
+const NOT_CLAIM_TERMS_RE = /\b(declaration|proposed order|objection|brief|memorandum|transcript)\b/i;
+
+/** Index into CLAIM_TERM_KINDS, or CLAIM_TERM_KINDS.length when the exhibit is none of them. */
+function claimTermRank(exhibitName: string): number {
+  if (NOT_CLAIM_TERMS_RE.test(exhibitName)) return CLAIM_TERM_KINDS.length;
+  const i = CLAIM_TERM_KINDS.findIndex((re) => re.test(exhibitName));
+  return i < 0 ? CLAIM_TERM_KINDS.length : i;
 }
 
 export interface ClDocketEntry {

@@ -14,7 +14,7 @@ import {
   updateCaseFields,
   upsertCaseRecord,
 } from "@/lib/repo/ingest";
-import type { CaseStatus } from "@/lib/types";
+import type { CaseStatus, ProofOfPurchase } from "@/lib/types";
 
 interface SampleFile {
   brands: { name: string; parentCompany: string; category: string; aliases: string[] }[];
@@ -31,6 +31,8 @@ interface SampleFile {
     claimUrl: string | null;
     claimDeadline: string | null;
     settlementAmount: string | null;
+    proofOfPurchase?: ProofOfPurchase;
+    noProofPayout?: string | null;
     states: string[];
     categories: string[];
     brands: { name: string; products: string[] }[];
@@ -70,6 +72,8 @@ async function main() {
       claimUrl: c.claimUrl,
       claimDeadline: c.claimDeadline,
       settlementAmount: c.settlementAmount,
+      proofOfPurchase: c.proofOfPurchase ?? "unknown",
+      noProofPayout: c.noProofPayout ?? null,
       states: c.states,
       categories: c.categories,
       lastChecked: now,

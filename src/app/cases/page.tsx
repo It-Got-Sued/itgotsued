@@ -3,7 +3,7 @@ import { searchCases } from "@/lib/repo/cases";
 import { getBrandByNormalized, listBrands } from "@/lib/repo/brands";
 import { CaseRows } from "@/components/CaseRows";
 import { lookupAndStoreCases } from "@/lib/ingest/live-lookup";
-import { CaseFilters, type FilterValues } from "@/components/CaseFilters";
+import { CaseFilters, isProofOfPurchase, type FilterValues } from "@/components/CaseFilters";
 import { Pagination } from "@/components/Pagination";
 import { isCaseStatus, STATUS_INFO } from "@/components/status";
 import { Reveal } from "@/components/motion";
@@ -46,7 +46,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
     title: page > 1 ? `${title} (Page ${page})` : title,
     description,
     path,
-    noindex: Boolean(one(sp.q)) || (Boolean(brandKey) && !brand),
+    noindex: Boolean(one(sp.q)) || Boolean(one(sp.proof)) || (Boolean(brandKey) && !brand),
   });
 }
 
@@ -57,6 +57,7 @@ export default async function CasesPage({ searchParams }: { searchParams: Promis
     status: isCaseStatus(one(sp.status)) ? one(sp.status) : "",
     state: /^[A-Za-z]{2}$/.test(one(sp.state)) ? one(sp.state).toUpperCase() : "",
     brand: one(sp.brand).toLowerCase().slice(0, 100),
+    proof: isProofOfPurchase(one(sp.proof)) ? one(sp.proof) : "",
   };
   const page = Math.max(1, Number.parseInt(one(sp.page), 10) || 1);
 
@@ -65,6 +66,7 @@ export default async function CasesPage({ searchParams }: { searchParams: Promis
     status: isCaseStatus(values.status) ? values.status : undefined,
     state: values.state || undefined,
     brand: values.brand || undefined,
+    proof: isProofOfPurchase(values.proof) ? values.proof : undefined,
     page,
     pageSize: PAGE_SIZE,
   };
@@ -122,6 +124,7 @@ export default async function CasesPage({ searchParams }: { searchParams: Promis
               if (values.q) qs.set("q", values.q);
               if (values.state) qs.set("state", values.state);
               if (values.brand) qs.set("brand", values.brand);
+              if (values.proof) qs.set("proof", values.proof);
               if (s.key) qs.set("status", s.key);
               const href = qs.toString() ? `/cases?${qs}` : "/cases";
               return (

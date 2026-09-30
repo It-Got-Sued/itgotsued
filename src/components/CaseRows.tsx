@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { CaseSummary } from "@/lib/types";
+import { NoProofBadge, paysWithoutProof } from "./NoProofBadge";
 import { StatusBadge } from "./StatusBadge";
 import { SampleBadge } from "./SampleBadge";
 import { daysUntil, formatDate } from "./format";
@@ -41,6 +42,7 @@ export function CaseRows({
             >
               <div className="flex flex-wrap items-center gap-1.5">
                 <StatusBadge status={c.status} />
+                {paysWithoutProof(c) && <NoProofBadge />}
                 {c.isSample && <SampleBadge />}
               </div>
 

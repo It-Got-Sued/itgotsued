@@ -32,6 +32,8 @@
       "claimUrl": "https://example.com/claim",
       "claimDeadline": "2027-03-31",
       "settlementAmount": "$4,500,000",
+      "proofOfPurchase": "not_required",
+      "noProofPayout": "$2 per product, up to $20 per household",
       "states": [],
       "categories": ["food_labeling", "beverage"],
       "brands": [
@@ -57,6 +59,8 @@
       "claimUrl": "https://example.com/claim",
       "claimDeadline": "2026-12-15",
       "settlementAmount": "$2,100,000",
+      "proofOfPurchase": "not_required",
+      "noProofPayout": "Refund for up to 5 tubes",
       "states": [],
       "categories": ["false_advertising", "personal_care"],
       "brands": [{ "name": "Brightsmile Toothpaste", "products": ["Brightsmile Whitening Toothpaste"] }],
