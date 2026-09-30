@@ -11,9 +11,12 @@ import { Reveal } from "@/components/motion";
 import { formatDate, safeUrl } from "@/components/format";
 import { Disclaimer } from "@/components/Disclaimer";
 import { ApplyPanel } from "@/components/case/ApplyPanel";
+import { ComplaintAnalysis } from "@/components/case/ComplaintAnalysis";
 import { ComplaintViewer } from "@/components/case/ComplaintViewer";
 import { DocketTable } from "@/components/case/DocketTable";
 import { FollowBrand } from "@/components/case/FollowBrand";
+import { SITE_NAME, SITE_URL, jsonLd, pageMetadata } from "@/lib/seo";
+import type { CaseDetail } from "@/lib/types";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -31,12 +34,46 @@ const loadCase = cache(async (id: string) => {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const c = await loadCase(id);
-  if (!c) return { title: "Case not found" };
-  return {
-    title: c.caseName,
-    description: c.summary ?? `${c.caseName} — ${c.court}. ${STATUS_INFO[c.status].label}.`,
-    robots: c.isSample ? { index: false } : undefined,
-  };
+  if (!c) return { title: "Case not found", robots: { index: false } };
+  const status = STATUS_INFO[c.status] ?? STATUS_INFO.unknown;
+  const filed = formatDate(c.dateFiled);
+  const fallback =
+    `${c.caseName}${filed ? `, filed ${filed}` : ""} in ${c.court}. Status: ${status.label}.` +
+    (c.brands.length ? ` Brands named: ${c.brands.slice(0, 3).join(", ")}.` : "") +
+    " See who qualifies and how to file a claim.";
+  return pageMetadata({
+    // Short case names have room for the search phrase people actually type.
+    title: c.caseName.length <= 26 ? `${c.caseName} Class Action Lawsuit` : c.caseName,
+    description: c.summary ?? fallback,
+    path: `/cases/${encodeURIComponent(c.id)}`,
+    type: "article",
+    noindex: c.isSample,
+  });
+}
+
+function caseStructuredData(c: CaseDetail, description: string) {
+  const url = `${SITE_URL}/cases/${encodeURIComponent(c.id)}`;
+  return [
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: `${SITE_URL}/` },
+        { "@type": "ListItem", position: 2, name: "Class action lawsuits", item: `${SITE_URL}/cases` },
+        { "@type": "ListItem", position: 3, name: c.caseName, item: url },
+      ],
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      name: c.caseName,
+      url,
+      description,
+      ...(c.updatedAt ? { dateModified: c.updatedAt } : {}),
+      ...(c.brands.length ? { about: c.brands.map((name) => ({ "@type": "Organization", name })) } : {}),
+      isPartOf: { "@type": "WebSite", name: SITE_NAME, url: `${SITE_URL}/` },
+    },
+  ];
 }
 
 export default async function CasePage({ params }: Props) {
@@ -57,6 +94,12 @@ export default async function CasePage({ params }: Props) {
 
   return (
     <article className="space-y-8">
+      {!c.isSample && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={jsonLd(caseStructuredData(c, c.summary ?? status.explanation))}
+        />
+      )}
       {c.isSample && <SampleBanner />}
 
       <Reveal>
@@ -124,6 +167,12 @@ export default async function CasePage({ params }: Props) {
               </>
             )}
           </Reveal>
+
+          {c.complaintAnalysis?.analysis && (
+            <Reveal>
+              <ComplaintAnalysis record={c.complaintAnalysis} />
+            </Reveal>
+          )}
 
           <Reveal>
             <ComplaintViewer url={safeUrl(c.complaintUrl)} />

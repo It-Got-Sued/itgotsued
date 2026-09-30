@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
 import { MyItems } from "@/components/myitems/MyItems";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "My Items",
-  description: "Keep a list of what you own on your device and check it against active class action lawsuits.",
-};
+  description:
+    "Keep a list of what you own on your device and check it against active class action lawsuits.",
+  path: "/my-items",
+  // Personal, device-only list: nothing here for search engines.
+  noindex: true,
+});
 
 export default function MyItemsPage() {
   return (

@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Privacy",
-  description: "How It Got Sued handles your photos, bank data, and email — in plain English.",
-};
+export const metadata: Metadata = pageMetadata({
+  title: "Privacy Policy in Plain English",
+  description:
+    "How It Got Sued handles your photos, bank data, and email, in plain English. No account needed, bank connections removed right after each scan.",
+  path: "/privacy",
+});
 
 const SECTIONS: { title: string; points: React.ReactNode[] }[] = [
   {

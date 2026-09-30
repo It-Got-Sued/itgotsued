@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { SITE_NAME, SITE_URL } from "@/lib/seo";
 import "./globals.css";
 
 // Fonts are self-hosted from src/app/fonts (SIL Open Font License) so builds never
@@ -20,14 +21,19 @@ const body = localFont({
   display: "swap",
 });
 
+// Defaults for every page. Canonicals live in each page's metadata (see pageMetadata),
+// never here, so a page without one does not inherit the homepage canonical.
 export const metadata: Metadata = {
-  metadataBase: new URL("https://itgotsued.com"),
+  metadataBase: new URL(SITE_URL),
+  applicationName: SITE_NAME,
   title: {
-    default: "It Got Sued: find lawsuits over the stuff you own",
+    default: "It Got Sued: Class Action Lawsuits Over Stuff You Own",
     template: "%s | It Got Sued",
   },
   description:
-    "Every U.S. class action lawsuit in one index. Describe what you own, snap a photo, or scan your bank transactions to see which of your things got sued and where to file a claim.",
+    "Search every U.S. class action lawsuit. Scan what you own by photo, text, or bank transactions to see which brands got sued and where to file a claim.",
+  openGraph: { siteName: SITE_NAME, type: "website", locale: "en_US" },
+  twitter: { card: "summary_large_image" },
 };
 
 export const viewport: Viewport = {

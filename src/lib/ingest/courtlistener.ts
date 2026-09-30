@@ -23,10 +23,16 @@ export const CONSUMER_NOS = ["190", "370", "371", "380", "385", "480", "485", "8
  * Pass `nos = null` to search every nature of suit (securities, privacy, employment, ...).
  */
 export function buildClassActionQuery(nos: string[] | null = CONSUMER_NOS): string {
+  // Not the bare phrase "class action": every civil cover sheet has a "class action" checkbox,
+  // so it matches ordinary contract and civil rights suits.
   const signals = [
-    '"class action"',
+    '"class action complaint"',
     '"all others similarly situated"',
+    '"all other similarly situated"',
     '"putative class"',
+    '"proposed class"',
+    '"on behalf of a class"',
+    '"class representative"',
     'cause:"1453"',
   ].join(" OR ");
   return nos ? `(${signals}) AND suitNature:(${nos.join(" OR ")})` : `(${signals})`;
@@ -45,7 +51,7 @@ export function buildSettlementActivityQuery(since: string): string {
     '"settlement administrator"',
     '"class settlement"',
   ].join(" OR ");
-  return `(${settlement}) AND ("class action" OR "class settlement" OR "settlement class") AND entry_date_filed:[${since} TO *]`;
+  return `(${settlement}) AND ("class action settlement" OR "class settlement" OR "settlement class" OR "class members") AND entry_date_filed:[${since} TO *]`;
 }
 
 export interface ClRecapDocument {
@@ -270,7 +276,7 @@ export function toCaseRecord(r: ClSearchDocket, docs: ClRecapDocument[] = r.reca
     source: "courtlistener",
     sourceId: String(r.docket_id),
     sourceUrl: `${CL_BASE}${r.docket_absolute_url}`,
-    caseName: r.caseName || r.case_name_full || `Docket ${r.docket_id}`,
+    caseName: cleanCaseName(r.caseName || r.case_name_full || `Docket ${r.docket_id}`),
     court: r.court || r.court_id,
     courtId: r.court_id || null,
     dateFiled: r.dateFiled || null,
@@ -282,4 +288,13 @@ export function toCaseRecord(r: ClSearchDocket, docs: ClRecapDocument[] = r.reca
     cause: r.cause?.trim() || null,
     complaintUrl: pickComplaintUrl(docs),
   };
+}
+
+/** "Burnell, individually and on behalf of all others similarly situated v. Mazda" -> "Burnell v. Mazda". */
+export function cleanCaseName(name: string): string {
+  return name
+    .replace(/,?\s+(individually\s+and\s+)?on\s+behalf\s+of\s+(himself|herself|themselves|itself|themself)?\s*(and\s+)?all\s+others?\s+similarly\s+situated,?/gi, "")
+    .replace(/,?\s+individually(\s+and\s+as\s+[^v]+?)?(?=\s+v\.?\s)/gi, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
 }

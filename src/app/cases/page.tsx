@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { searchCases } from "@/lib/repo/cases";
-import { listBrands } from "@/lib/repo/brands";
+import { getBrandByNormalized, listBrands } from "@/lib/repo/brands";
 import { CaseRows } from "@/components/CaseRows";
 import { lookupAndStoreCases } from "@/lib/ingest/live-lookup";
 import { CaseFilters, type FilterValues } from "@/components/CaseFilters";
@@ -9,16 +9,43 @@ import { isCaseStatus, STATUS_INFO } from "@/components/status";
 import { Reveal } from "@/components/motion";
 import { CASE_STATUSES } from "@/lib/types";
 import Link from "next/link";
-
-export const metadata: Metadata = {
-  title: "All class action lawsuits",
-  description: "Search and filter every U.S. class action lawsuit by status, state, and brand.",
-};
+import { pageMetadata } from "@/lib/seo";
 
 const PAGE_SIZE = 20;
 
 type SP = Record<string, string | string[] | undefined>;
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v)?.trim() ?? "";
+
+// Brand and status views are real landing pages ("Amazon class action lawsuits",
+// "open class action settlements"), so they keep their own canonical. State filters
+// fold into the unfiltered view, and free-text search results are not indexed.
+export async function generateMetadata({ searchParams }: { searchParams: Promise<SP> }): Promise<Metadata> {
+  const sp = await searchParams;
+  const status = isCaseStatus(one(sp.status)) ? one(sp.status) : "";
+  const brandKey = one(sp.brand).toLowerCase().slice(0, 100);
+  const page = Math.max(1, Number.parseInt(one(sp.page), 10) || 1);
+  const brand = brandKey ? await getBrandByNormalized(brandKey).catch(() => null) : null;
+
+  const qs = new URLSearchParams();
+  if (brand) qs.set("brand", brand.normalized);
+  if (status) qs.set("status", status);
+  if (page > 1) qs.set("page", String(page));
+  const path = qs.size ? `/cases?${qs}` : "/cases";
+
+  const statusLabel = isCaseStatus(status) ? STATUS_INFO[status].label : "";
+  const subject = [brand?.name, statusLabel].filter(Boolean).join(" ");
+  const title = subject ? `${subject} Class Action Lawsuits` : "All U.S. Class Action Lawsuits";
+  const description = brand
+    ? `Every class action lawsuit naming ${brand.name}${statusLabel ? ` (${statusLabel.toLowerCase()})` : ""}: court, docket, status, who qualifies, and where to file a claim when one opens.`
+    : `Search and filter ${statusLabel ? `${statusLabel.toLowerCase()} ` : ""}U.S. class action lawsuits by brand, state, and status. See who qualifies and where to file a claim.`;
+
+  return pageMetadata({
+    title: page > 1 ? `${title} (Page ${page})` : title,
+    description,
+    path,
+    noindex: Boolean(one(sp.q)) || (Boolean(brandKey) && !brand),
+  });
+}
 
 export default async function CasesPage({ searchParams }: { searchParams: Promise<SP> }) {
   const sp = await searchParams;
@@ -67,7 +94,13 @@ export default async function CasesPage({ searchParams }: { searchParams: Promis
     const s = qs.toString();
     return s ? `/cases?${s}` : "/cases";
   };
-  const heading = isCaseStatus(values.status) ? `${STATUS_INFO[values.status].label} lawsuits` : "All class action lawsuits";
+  const brandName = values.brand ? brands?.find((b) => b.normalized === values.brand)?.name : undefined;
+  const statusLabel = isCaseStatus(values.status) ? STATUS_INFO[values.status].label : "";
+  const heading = brandName
+    ? `${brandName}${statusLabel ? ` ${statusLabel.toLowerCase()}` : ""} class action lawsuits`
+    : statusLabel
+      ? `${statusLabel} lawsuits`
+      : "All class action lawsuits";
 
   return (
     <div className="space-y-8">

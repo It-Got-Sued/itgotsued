@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { connection } from "next/server";
 import { searchCases } from "@/lib/repo/cases";
@@ -9,6 +10,36 @@ import { CaseList } from "@/components/CaseCard";
 import { Alert } from "@/components/Alert";
 import { HeroVisual } from "@/components/HeroVisual";
 import { IconBank, IconCamera, IconList, IconPencil, IconShield } from "@/components/icons";
+import { SITE_NAME, SITE_URL, jsonLd, pageMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = pageMetadata({
+  title: "It Got Sued: Class Action Lawsuits Over Stuff You Own",
+  absoluteTitle: true,
+  description:
+    "Search every U.S. class action lawsuit. Scan what you own by photo, text, or bank transactions to see which brands got sued and where to file a claim.",
+  path: "/",
+});
+
+const STRUCTURED_DATA = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE_NAME,
+    url: `${SITE_URL}/`,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: { "@type": "EntryPoint", urlTemplate: `${SITE_URL}/cases?q={search_term_string}` },
+      "query-input": "required name=search_term_string",
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: SITE_NAME,
+    url: `${SITE_URL}/`,
+    description: "A free index of U.S. class action lawsuits, matched to the brands people own.",
+  },
+];
 
 const QUICK_FILTERS = [
   { status: "claims_open", label: "Claims open now" },
@@ -63,6 +94,7 @@ export default async function Home() {
 
   return (
     <div className="space-y-20 sm:space-y-28">
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(STRUCTURED_DATA)} />
       {/* ---------- Hero ---------- */}
       <section className="grid items-center gap-12 pt-2 lg:grid-cols-[1.1fr_1fr] lg:gap-8">
         <div className="space-y-7">

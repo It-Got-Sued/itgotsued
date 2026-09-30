@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Disclaimer } from "@/components/Disclaimer";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "About",
-  description: "Why It Got Sued exists and how it works.",
-};
+export const metadata: Metadata = pageMetadata({
+  title: "How We Track Class Action Lawsuits",
+  description:
+    "How It Got Sued tracks U.S. class action lawsuits from federal court dockets, matches them to the brands you own, and links to official claim sites.",
+  path: "/about",
+});
 
 export default function AboutPage() {
   return (

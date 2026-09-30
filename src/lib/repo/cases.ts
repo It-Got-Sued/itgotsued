@@ -1,4 +1,5 @@
 import { query, queryOne } from "@/lib/db";
+import { getComplaintAnalysis } from "@/lib/repo/complaints";
 import type {
   CaseDetail,
   CaseSearchParams,
@@ -94,17 +95,20 @@ export async function searchCases(params: CaseSearchParams): Promise<CaseSearchR
 export async function getCase(id: string): Promise<CaseDetail | null> {
   const r = await queryOne(
     `SELECT ${SUMMARY_COLUMNS}, c.source, c.source_url, c.nature_of_suit, c.who_qualifies,
-            c.complaint_url, c.settlement_amount, c.states, c.categories, c.last_checked
+            c.complaint_url, c.settlement_amount, c.states, c.categories, c.last_checked, c.updated_at
      FROM cases c WHERE c.id = $1`,
     [id],
   );
   if (!r) return null;
 
-  const entries = await query(
-    `SELECT entry_number, date_filed, description, document_url FROM docket_entries
-     WHERE case_id = $1 ORDER BY entry_number NULLS LAST, date_filed, id`,
-    [id],
-  );
+  const [entries, complaintAnalysis] = await Promise.all([
+    query(
+      `SELECT entry_number, date_filed, description, document_url FROM docket_entries
+       WHERE case_id = $1 ORDER BY entry_number NULLS LAST, date_filed, id`,
+      [id],
+    ),
+    getComplaintAnalysis(id),
+  ]);
 
   return {
     ...toSummary(r),
@@ -117,6 +121,7 @@ export async function getCase(id: string): Promise<CaseDetail | null> {
     states: (r.states as string[]) ?? [],
     categories: (r.categories as string[]) ?? [],
     lastChecked: iso(r.last_checked),
+    updatedAt: iso(r.updated_at),
     docketEntries: entries.map(
       (e): DocketEntry => ({
         entryNumber: (e.entry_number as number) ?? null,
@@ -125,6 +130,7 @@ export async function getCase(id: string): Promise<CaseDetail | null> {
         documentUrl: (e.document_url as string) ?? null,
       }),
     ),
+    complaintAnalysis,
   };
 }
 

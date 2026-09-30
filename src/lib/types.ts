@@ -59,7 +59,56 @@ export interface CaseDetail extends CaseSummary {
   states: string[];
   categories: string[];
   lastChecked: string | null; // ISO datetime
+  updatedAt: string | null; // ISO datetime of the last content change
   docketEntries: DocketEntry[];
+  /** AI reading of the complaint PDF; null until scripts/parse-complaints.ts has run. */
+  complaintAnalysis: ComplaintAnalysisRecord | null;
+}
+
+// AI reading of a complaint PDF (validated in src/lib/ingest/complaint.ts).
+export interface ComplaintAnalysis {
+  is_complaint: boolean; // false if the PDF is not actually a complaint
+  summary: string; // plain-English summary
+  allegations: {
+    overview: string;
+    defendant_conduct: string[];
+    products_or_services: string[];
+    legal_claims: string[]; // causes of action, e.g. "Breach of implied warranty"
+  };
+  class_definition: {
+    verbatim: string | null; // class definition as written in the complaint
+    plain_language: string | null;
+    eligibility_criteria: string[];
+    class_period: string | null; // e.g. "January 1, 2020 to present"
+    geography: string | null; // e.g. "Nationwide" or "California residents"
+    subclasses: { name: string; definition: string }[];
+  };
+  estimated_payout: {
+    low_usd: number | null; // per class member
+    high_usd: number | null; // per class member
+    basis: string; // reasoning: damages sought, statutory damages, comparable settlements
+    damages_sought: string | null;
+    statutory_damages: string | null;
+    comparable_settlements: string | null;
+    confidence: "low" | "medium" | "high";
+    disclaimer: string; // always: an estimate, not a guarantee
+  };
+  defendants: string[];
+  plaintiffs: string[];
+  court: string | null;
+  relief_sought: string[];
+  key_dates: { date: string | null; event: string }[];
+}
+
+export interface ComplaintAnalysisRecord {
+  status: "parsed" | "unparseable";
+  error: string | null;
+  complaintUrl: string;
+  pageCount: number | null;
+  truncated: boolean;
+  model: string | null;
+  parsedAt: string; // ISO datetime
+  analysis: ComplaintAnalysis | null; // null when unparseable
 }
 
 export interface Brand {
