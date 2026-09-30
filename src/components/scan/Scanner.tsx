@@ -14,6 +14,7 @@ import { DetectionChips } from "./DetectionChips";
 import { TextDescribe } from "./TextDescribe";
 import { PhotoScan } from "./PhotoScan";
 import { BankScan } from "./BankScan";
+import { FREE_DAILY_SCANS } from "@/lib/tiers";
 
 type MatchState =
   | { kind: "idle" }
@@ -30,7 +31,9 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
 ];
 
 /** The "What do you own?" panel: collect → confirm chips → match. */
-export function Scanner({ headingLevel = 2 }: { headingLevel?: 1 | 2 }) {
+/** `tier`: free accounts get the Describe tab only (limited per day); Pro gets photo, bank, and My Items. */
+export function Scanner({ headingLevel = 2, tier = "pro" }: { headingLevel?: 1 | 2; tier?: "free" | "pro" }) {
+  const pro = tier === "pro";
   const H = `h${headingLevel}` as "h1" | "h2";
   const [tab, setTab] = useState<Tab>("text");
   const [detections, setDetections] = useState<BrandDetection[]>([]);
@@ -97,9 +100,17 @@ export function Scanner({ headingLevel = 2 }: { headingLevel?: 1 | 2 }) {
             What do you own?
           </H>
           <p className="mt-1 max-w-xl text-muted">
-            Pick a way below. You&apos;ll confirm the brands before we search. No account needed —
-            or keep a running list in{" "}
-            <Link href="/my-items" className="link">My Items</Link>.
+            Pick a way below. You&apos;ll confirm the brands before we search.{" "}
+            {pro ? (
+              <>
+                Keep a running list in <Link href="/my-items" className="link">My Items</Link>.
+              </>
+            ) : (
+              <>
+                Free accounts get {FREE_DAILY_SCANS} scans a day.{" "}
+                <Link href="/pricing" className="link">Go unlimited with Pro</Link>.
+              </>
+            )}
           </p>
         </div>
       </div>
@@ -154,8 +165,8 @@ export function Scanner({ headingLevel = 2 }: { headingLevel?: 1 | 2 }) {
             className="animate-fade-up"
           >
             {t.id === "text" && <TextDescribe onDetections={addDetections} />}
-            {t.id === "photo" && <PhotoScan onDetections={addDetections} />}
-            {t.id === "bank" && <BankScan onDetections={addDetections} />}
+            {t.id === "photo" && (pro ? <PhotoScan onDetections={addDetections} /> : <ProOnly what="Photo scans" />)}
+            {t.id === "bank" && (pro ? <BankScan onDetections={addDetections} /> : <ProOnly what="Bank scans" />)}
           </div>
         ))}
       </div>
@@ -188,7 +199,7 @@ export function Scanner({ headingLevel = 2 }: { headingLevel?: 1 | 2 }) {
                   <IconSparkle size={16} />
                   Find lawsuits for {groups.length} brand{groups.length === 1 ? "" : "s"}
                 </button>
-                <AddToMyItems items={groups.map((g) => ({ label: g.label }))} label="Save all to My Items" />
+                {pro && <AddToMyItems items={groups.map((g) => ({ label: g.label }))} label="Save all to My Items" />}
                 {match.kind === "loading" && <Spinner label="Matching against every lawsuit…" />}
               </div>
               {match.kind === "error" && <Alert>{match.message}</Alert>}
@@ -239,14 +250,18 @@ export function Scanner({ headingLevel = 2 }: { headingLevel?: 1 | 2 }) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.08 * i, duration: 0.45 }}
             >
-              <BrandMatchSection match={m} actions={<AddToMyItems items={[{ label: m.brand.name }]} />} />
+              <BrandMatchSection match={m} actions={pro ? <AddToMyItems items={[{ label: m.brand.name }]} /> : undefined} />
             </motion.div>
           ))}
           <ParentNotes matches={match.matches} />
           {unmatched.length > 0 && (
             <p className="text-sm text-muted">
-              No lawsuits found yet for: {unmatched.map((g) => g.label).join(", ")}. Save them to{" "}
-              <Link href="/my-items" className="link">My Items</Link> to check again later.
+              No lawsuits found yet for: {unmatched.map((g) => g.label).join(", ")}.
+              {pro && (
+                <>
+                  {" "}Save them to <Link href="/my-items" className="link">My Items</Link> to check again later.
+                </>
+              )}
             </p>
           )}
           <p className="text-sm text-muted">
@@ -256,5 +271,15 @@ export function Scanner({ headingLevel = 2 }: { headingLevel?: 1 | 2 }) {
         </motion.div>
       )}
     </section>
+  );
+}
+
+function ProOnly({ what }: { what: string }) {
+  return (
+    <div className="space-y-3 rounded-2xl border-2 border-border bg-surface-muted p-5">
+      <p className="font-bold">{what} are part of It Got Sued Pro.</p>
+      <p className="text-sm text-muted">Upgrade for unlimited scans, claim links, who qualifies, and brand alerts.</p>
+      <Link href="/pricing" className="btn-primary">See plans</Link>
+    </div>
   );
 }

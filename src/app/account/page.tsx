@@ -3,6 +3,10 @@ import { Alert } from "@/components/Alert";
 import { logout } from "@/lib/auth/actions";
 import { requireUser } from "@/lib/auth/session";
 import { hasActiveSubscription } from "@/lib/repo/users";
+import { usedToday } from "@/lib/repo/usage";
+import { proPriceLabel } from "@/lib/stripe";
+import { FREE_DAILY_SCANS } from "@/lib/tiers";
+import Link from "next/link";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
@@ -13,7 +17,7 @@ export const metadata: Metadata = pageMetadata({
 });
 
 const NOTICES: Record<string, { tone: "success" | "info" | "danger"; text: string }> = {
-  welcome: { tone: "success", text: "Welcome! Your account is ready. Subscribe below to unlock everything." },
+  welcome: { tone: "success", text: "Welcome! Your free account is ready. Upgrade to Pro below to unlock everything." },
   reset: { tone: "success", text: "Your password was changed. Other devices were signed out." },
   success: { tone: "success", text: "Thanks for subscribing! It can take a few seconds to show as active — refresh if needed." },
   canceled: { tone: "info", text: "Checkout canceled. You weren't charged." },
@@ -32,6 +36,7 @@ export default async function AccountPage({
   const sp = await searchParams;
   const notice = NOTICES[sp.checkout ?? (sp.reset ? "reset" : sp.welcome ? "welcome" : "")];
   const active = hasActiveSubscription(user);
+  const [price, scansUsed] = await Promise.all([proPriceLabel(), active ? 0 : usedToday(user.id, "scan")]);
 
   return (
     <div className="mx-auto max-w-xl space-y-6">
@@ -43,11 +48,11 @@ export default async function AccountPage({
       {notice && <Alert tone={notice.tone}>{notice.text}</Alert>}
 
       <section className="card space-y-3 p-6">
-        <h2 className="text-xl font-bold">Subscription</h2>
+        <h2 className="text-xl font-bold">Plan: {active ? "Pro" : "Free"}</h2>
         {active ? (
           <>
             <p>
-              <strong>It Got Sued — $5/month.</strong>{" "}
+              <strong>It Got Sued Pro — {price}.</strong>{" "}
               {user.currentPeriodEnd &&
                 (user.cancelAtPeriodEnd
                   ? `Ends ${fmtDate(user.currentPeriodEnd)}.`
@@ -63,13 +68,14 @@ export default async function AccountPage({
               <Alert tone="warn">Your last payment failed. Update your card to keep access.</Alert>
             ) : (
               <p className="text-muted">
-                Unlock lawsuit details, who qualifies, claim links and deadlines, court filings,
-                scanning, My Items, and brand alerts. Cancel anytime.
+                {Math.max(0, FREE_DAILY_SCANS - scansUsed)} of {FREE_DAILY_SCANS} free scans left today.
+                Pro unlocks who qualifies, claim links, court filings, photo and bank scans, My Items,
+                and brand alerts. <Link href="/pricing" className="link">Compare plans</Link>
               </p>
             )}
             <div className="flex flex-wrap gap-2">
               <form action="/api/billing/checkout" method="post">
-                <button type="submit" className="btn-primary">Subscribe for $5/month</button>
+                <button type="submit" className="btn-primary">Upgrade to Pro for {price}</button>
               </form>
               {user.stripeCustomerId && (
                 <form action="/api/billing/portal" method="post">

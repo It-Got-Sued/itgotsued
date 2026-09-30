@@ -11,7 +11,7 @@ import { Alert } from "@/components/Alert";
 import { HeroVisual } from "@/components/HeroVisual";
 import { IconBank, IconCamera, IconList, IconPencil, IconShield } from "@/components/icons";
 import { SITE_NAME, SITE_URL, jsonLd, pageMetadata } from "@/lib/seo";
-import { isSubscriber } from "@/lib/auth/session";
+import { getTier } from "@/lib/auth/session";
 import { shieldSummary } from "@/lib/paywall";
 import { Paywall } from "@/components/Paywall";
 
@@ -94,8 +94,8 @@ async function loadHome(): Promise<{
 
 export default async function Home() {
   const { open, totalCases, totalBrands } = await loadHome();
-  const paid = await isSubscriber();
-  if (open && !paid) open.cases = open.cases.map(shieldSummary);
+  const tier = await getTier();
+  if (open) open.cases = open.cases.map((c) => shieldSummary(c, tier));
 
   return (
     <div className="space-y-20 sm:space-y-28">
@@ -132,7 +132,11 @@ export default async function Home() {
 
       {/* ---------- Scanner ---------- */}
       <div id="scan" className="scroll-mt-24">
-        {paid ? <Scanner /> : <Paywall feature="Check your stuff by photo, text, or bank scan" next="/#scan" />}
+        {tier === "anonymous" ? (
+          <Paywall min="free" feature="Check your stuff for lawsuits" next="/#scan" />
+        ) : (
+          <Scanner tier={tier} />
+        )}
       </div>
 
       {/* ---------- Ways to check ---------- */}

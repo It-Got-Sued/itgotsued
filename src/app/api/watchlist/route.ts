@@ -1,4 +1,4 @@
-import { subscriberOnlyResponse } from "@/lib/auth/session";
+import { tierDeniedResponse } from "@/lib/auth/session";
 import { z } from "zod";
 import { addToWatchlist, getBrandByNormalized, normalizeBrandKey } from "@/lib/repo/brands";
 
@@ -11,7 +11,7 @@ const Body = z.object({
 
 // POST /api/watchlist { email, brand } -> { ok: true } | 400 | 404 (unknown brand)
 export async function POST(request: Request) {
-  const denied = await subscriberOnlyResponse();
+  const denied = await tierDeniedResponse("pro");
   if (denied) return denied;
   let json: unknown;
   try {

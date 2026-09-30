@@ -1,4 +1,5 @@
 import { query, queryOne } from "@/lib/db";
+import { tierOf } from "@/lib/tiers";
 
 export type User = {
   id: string;
@@ -35,8 +36,8 @@ export function toUser(r: Row): User {
 }
 
 /** Stripe statuses that unlock paid features. */
-export function hasActiveSubscription(user: Pick<User, "subscriptionStatus"> | null): boolean {
-  return !!user && (user.subscriptionStatus === "active" || user.subscriptionStatus === "trialing");
+export function hasActiveSubscription(user: User | null): boolean {
+  return tierOf(user) === "pro";
 }
 
 export function normalizeEmail(email: string): string {
