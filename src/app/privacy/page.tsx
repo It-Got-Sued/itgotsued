@@ -25,7 +25,7 @@ const SECTIONS: { title: string; points: React.ReactNode[] }[] = [
     title: "What you type",
     points: [
       "Descriptions you type are used only to pick out brand names, then discarded.",
-      "Your My Items list is saved only in your browser on your device. We see the item names only at the moment you check them, and we don't keep them.",
+      "When you're signed in, your My Items list is saved to your account so it's there every time you sign in, on any device. Signed out, it stays only in your browser.",
     ],
   },
   {

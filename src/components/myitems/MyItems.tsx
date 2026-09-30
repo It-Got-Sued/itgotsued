@@ -92,8 +92,8 @@ export function MyItems() {
           )}
         </h2>
         <p className="text-sm text-muted">
-          This list is saved only in this browser on this device. It is never sent to our servers
-          except the item names, at the moment you check them, and we don&apos;t keep them.
+          Saved to your account, so your list is here every time you sign in, on any device.
+          Item names are checked against lawsuits when you run a check.
         </p>
         {storageWarning && (
           <Alert tone="warn">

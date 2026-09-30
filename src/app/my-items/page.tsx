@@ -1,24 +1,24 @@
 import type { Metadata } from "next";
 import { MyItems } from "@/components/myitems/MyItems";
 import { pageMetadata } from "@/lib/seo";
-import { isSubscriber } from "@/lib/auth/session";
+import { getTier } from "@/lib/auth/session";
 import { Paywall } from "@/components/Paywall";
 
 export const metadata: Metadata = pageMetadata({
   title: "My Items",
   description:
-    "Keep a list of what you own on your device and check it against active class action lawsuits.",
+    "Keep a list of what you own, saved to your account, and check it against active class action lawsuits.",
   path: "/my-items",
-  // Personal, device-only list: nothing here for search engines.
+  // Personal list: nothing here for search engines.
   noindex: true,
 });
 
 export default async function MyItemsPage() {
-  const paid = await isSubscriber();
+  const paid = (await getTier()) === "pro";
   return (
     <div className="space-y-8">
       <header className="space-y-3">
-        <p className="text-sm font-bold text-muted">Saved on this device</p>
+        <p className="text-sm font-bold text-muted">Saved to your account</p>
         <h1 className="text-4xl font-extrabold sm:text-5xl">
           My Items
         </h1>

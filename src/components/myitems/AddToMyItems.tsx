@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { addToStoredItems } from "./storage";
 
-/** Button that saves brands to the on-device My Items list. */
+/** Button that saves brands to the My Items list (browser, plus the account when signed in). */
 export function AddToMyItems({
   items,
   label = "Add to My Items",
