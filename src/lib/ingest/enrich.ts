@@ -1,21 +1,54 @@
 // AI enrichment of ingested cases: plain-language summary, who qualifies, defendant brands
-// and products, categories, states and a status guess, via Claude structured output.
-import Anthropic from "@anthropic-ai/sdk";
-import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
+// and products, categories, states and a status guess, via DeepSeek or the Vercel AI Gateway (./ai).
+// The model reads the court filings: the complaint PDF when CourtListener has one, otherwise
+// the other filings CourtListener has (settlement motions, orders), plus the docket entries.
+// When the complaint is read, its full ComplaintAnalysis is saved too.
+import { generateText, NoObjectGeneratedError, Output } from "ai";
 import { z } from "zod";
 import { stripCorporateSuffix } from "@/lib/brands/normalize";
 import { normalizeBrandKey, upsertBrand } from "@/lib/repo/brands";
+import { saveComplaintAnalysis } from "@/lib/repo/complaints";
 import {
   deleteCase,
   findBrandByNameOrAlias,
   linkCaseBrand,
   listCasesForEnrichment,
+  mergeDocketEntries,
   updateCaseFields,
   type EnrichmentCandidate,
 } from "@/lib/repo/ingest";
 import type { CaseStatus } from "@/lib/types";
+import {
+  analyzeComplaintText,
+  ComplaintAnalysisSkipped,
+  complaintModel,
+  downloadPdf,
+  extractPdfText,
+  selectExcerpts,
+  UnparseableComplaint,
+} from "./complaint";
+import { DEFAULT_MODEL, languageModel, missingCredentials } from "./ai";
+import {
+  CL_STORAGE,
+  ClHttpError,
+  CourtListenerClient,
+  fromDocketEntriesApi,
+  pickComplaintUrl,
+  type ClRecapDocument,
+} from "./courtlistener";
 
-export const ENRICH_MODEL = "claude-opus-5-5";
+export const DEFAULT_ENRICH_MODEL = DEFAULT_MODEL;
+
+export function enrichModel(): string {
+  return process.env.ENRICH_MODEL?.trim() || DEFAULT_ENRICH_MODEL;
+}
+
+/** Longest summary shown on a case page. */
+export const MAX_SUMMARY_WORDS = 200;
+/** Characters of filing text sent to the model: the complaint, or other filings when it is missing. */
+const COMPLAINT_CHARS = 100_000;
+const OTHER_FILING_CHARS = 30_000;
+const MAX_OTHER_FILINGS = 3;
 
 // claims_open is deliberately excluded: we only mark a case claims_open when we have the
 // official claim URL, which filings alone do not give us.
@@ -35,7 +68,7 @@ export const EnrichmentSchema = z.object({
   summary: z
     .string()
     .describe(
-      "2-4 plain-language sentences for consumers: who is suing whom, about what product or practice, and what they want. No legal jargon.",
+      `Plain-language summary for consumers, at most ${MAX_SUMMARY_WORDS} words: who is suing whom, about what product or practice, what they want, and where the case stands (for example a proposed settlement). No legal jargon.`,
     ),
   who_qualifies: z
     .string()
@@ -70,13 +103,13 @@ export const EnrichmentSchema = z.object({
 
 export type Enrichment = z.infer<typeof EnrichmentSchema>;
 
-const SYSTEM_PROMPT = `You analyze U.S. federal court dockets for ClassActionForMe, a consumer site that tells people which class action lawsuits may involve products and services they use.
+const SYSTEM_PROMPT = `You analyze U.S. federal court dockets for It Got Sued, a consumer site that tells people which class action lawsuits may involve products and services they use.
 
-From the docket metadata, docket entries and (when attached) the complaint, extract the requested fields. Write summaries for ordinary consumers at an 8th-grade reading level. Describe allegations as allegations ("says", "claims"), never as established facts. Do not give legal advice.
+From the docket metadata, docket entries and any attached court filings (the complaint, or other filings such as settlement motions and orders), extract the requested fields. Write summaries for ordinary consumers at an 8th-grade reading level. Describe allegations as allegations ("says", "claims"), never as established facts. Do not give legal advice.
 
 Only name brands and products that the filings actually identify. If the filings do not make something clear, return null, an empty list, or "unknown" rather than guessing. For status_guess: "filed" if the case is active without class certification, "certified" if a class was certified, "settlement_pending" if a settlement was proposed or preliminarily approved, "claims_closed" if a settlement's claim period ended, "dismissed" if dismissed or voluntarily dismissed, otherwise "unknown".`;
 
-function describeCase(c: EnrichmentCandidate): string {
+function describeCase(c: EnrichmentCandidate, filings: Filing[]): string {
   const entries = c.docketEntries
     .map((e) => `#${e.entryNumber ?? "?"} (${e.dateFiled ?? "n.d."}): ${e.description}`)
     .join("\n");
@@ -90,54 +123,153 @@ function describeCase(c: EnrichmentCandidate): string {
     "",
     "Docket entries available to us (may be partial):",
     entries || "(none)",
+    ...filings.map((f) => `\n<filing title="${f.title.replace(/"/g, "'")}">\n${f.text}\n</filing>`),
   ].join("\n");
 }
 
 export class EnrichmentSkipped extends Error {}
 
-export async function extractEnrichment(
-  client: Anthropic,
+interface Filing {
+  title: string;
+  text: string;
+}
+
+/** Text of the complaint, when it can be read. Kept so the complaint analysis reuses it. */
+interface ComplaintText {
+  url: string;
+  text: string;
+  pageCount: number;
+  textChars: number;
+  truncated: boolean;
+}
+
+// ---------------------------------------------------------------------------------------
+// CourtListener: fresh docket entries and the filings that have PDFs.
+
+/** Docket fetches are rate limited (125/day), so one failure disables them for the run. */
+let courtListener: CourtListenerClient | null | undefined;
+let courtListenerOff = false;
+
+function clClient(): CourtListenerClient | null {
+  if (courtListener === undefined) {
+    const token = process.env.COURTLISTENER_TOKEN;
+    courtListener = token ? new CourtListenerClient({ token, maxRetries: 0 }) : null;
+  }
+  return courtListenerOff ? null : courtListener;
+}
+
+/**
+ * Refresh a CourtListener case's docket entries and complaint URL, and return the RECAP
+ * documents that have PDFs. Only used when no complaint URL is stored, to save the daily quota.
+ */
+async function refreshFromCourtListener(
   c: EnrichmentCandidate,
-  opts: { includePdf: boolean },
-): Promise<Enrichment> {
-  const run = async (withPdf: boolean) => {
-    const content: Anthropic.Beta.BetaContentBlockParam[] = [];
-    if (withPdf && c.complaintUrl) {
-      content.push({
-        type: "document",
-        source: { type: "url", url: c.complaintUrl },
-        title: "Complaint",
-      });
-    }
-    content.push({ type: "text", text: describeCase(c) });
-    return client.beta.messages.parse({
-      model: ENRICH_MODEL,
-      max_tokens: 16000,
-      betas: ["server-side-fallback-2026-07-01"],
-      fallbacks: "default",
-      output_config: { effort: "medium", format: betaZodOutputFormat(EnrichmentSchema) },
-      system: SYSTEM_PROMPT,
-      messages: [{ role: "user", content }],
-    });
-  };
-
-  const usePdf = opts.includePdf && Boolean(c.complaintUrl);
-  let response;
+  log: (msg: string) => void,
+): Promise<ClRecapDocument[]> {
+  const client = clClient();
+  const docketId = c.id.startsWith("cl-") ? Number(c.id.slice(3)) : NaN;
+  if (!client || !Number.isInteger(docketId)) return [];
   try {
-    response = await run(usePdf);
+    const { entries, docs } = fromDocketEntriesApi((await client.docketEntries(docketId)).results ?? []);
+    await mergeDocketEntries(c.id, entries);
+    c.docketEntries = entries.slice(0, 60);
+    const complaintUrl = pickComplaintUrl(docs);
+    if (complaintUrl) {
+      await updateCaseFields(c.id, { complaintUrl });
+      c.complaintUrl = complaintUrl;
+    }
+    return docs.filter((d) => d.filepath_local);
   } catch (err) {
-    // The complaint URL may be unreachable or too large; retry from docket text alone.
-    if (usePdf && err instanceof Anthropic.BadRequestError) response = await run(false);
-    else throw err;
+    if (err instanceof ClHttpError) {
+      courtListenerOff = true;
+      log(`  CourtListener docket fetch stopped for this run (HTTP ${err.status}).`);
+      return [];
+    }
+    throw err;
   }
+}
 
-  if (response.stop_reason === "refusal") {
-    throw new EnrichmentSkipped(`model declined (${response.stop_details?.category ?? "no category"})`);
+const SETTLEMENT_RE = /\b(settlement|approval|class certification|certify|notice to (the )?class|fairness)\b/i;
+
+async function readPdf(url: string): Promise<{ text: string; pageCount: number } | null> {
+  try {
+    const pdf = await extractPdfText(await downloadPdf(url));
+    return { text: pdf.text, pageCount: pdf.pageCount };
+  } catch (err) {
+    if (err instanceof UnparseableComplaint) return null;
+    throw err;
   }
-  if (response.stop_reason === "max_tokens" || !response.parsed_output) {
-    throw new EnrichmentSkipped(`no structured output (stop_reason=${response.stop_reason})`);
+}
+
+/** The complaint text if readable; otherwise up to MAX_OTHER_FILINGS other filings, settlement ones first. */
+async function gatherFilings(
+  c: EnrichmentCandidate,
+  docs: ClRecapDocument[],
+): Promise<{ filings: Filing[]; complaint: ComplaintText | null }> {
+  if (c.complaintUrl) {
+    const pdf = await readPdf(c.complaintUrl);
+    if (pdf) {
+      const { text, truncated } = selectExcerpts(pdf.text, COMPLAINT_CHARS);
+      return {
+        filings: [{ title: "Complaint", text }],
+        complaint: { url: c.complaintUrl, text, pageCount: pdf.pageCount, textChars: pdf.text.length, truncated },
+      };
+    }
   }
-  return response.parsed_output;
+  const others = docs
+    .filter((d) => `${CL_STORAGE}/${d.filepath_local}` !== c.complaintUrl)
+    .sort(
+      (a, b) =>
+        Number(SETTLEMENT_RE.test(b.description)) - Number(SETTLEMENT_RE.test(a.description)) ||
+        (b.entry_number ?? 0) - (a.entry_number ?? 0),
+    )
+    .slice(0, MAX_OTHER_FILINGS);
+  const filings: Filing[] = [];
+  for (const d of others) {
+    const pdf = await readPdf(`${CL_STORAGE}/${d.filepath_local}`);
+    if (!pdf) continue;
+    filings.push({
+      title: `Docket entry ${d.entry_number ?? "?"}: ${d.description || "filing"}`,
+      text: selectExcerpts(pdf.text, OTHER_FILING_CHARS).text,
+    });
+  }
+  return { filings, complaint: null };
+}
+
+// ---------------------------------------------------------------------------------------
+// Model
+
+/** Cut to at most `max` words, ending on the last full sentence that fits when there is one. */
+export function capWords(text: string, max = MAX_SUMMARY_WORDS): string {
+  const words = text.trim().split(/\s+/);
+  if (words.length <= max) return text.trim();
+  const cut = words.slice(0, max).join(" ");
+  const end = cut.lastIndexOf(". ");
+  return end > cut.length / 2 ? cut.slice(0, end + 1) : `${cut}…`;
+}
+
+export async function extractEnrichment(
+  c: EnrichmentCandidate,
+  filings: Filing[],
+  opts: { model?: string } = {},
+): Promise<Enrichment> {
+  try {
+    const result = await generateText({
+      model: languageModel(opts.model ?? enrichModel()),
+      system: SYSTEM_PROMPT,
+      prompt: describeCase(c, filings),
+      output: Output.object({ schema: EnrichmentSchema }),
+      maxOutputTokens: 8_000,
+      maxRetries: 2,
+      abortSignal: AbortSignal.timeout(180_000),
+    });
+    return result.output;
+  } catch (err) {
+    if (NoObjectGeneratedError.isInstance(err)) {
+      throw new EnrichmentSkipped(`model returned no valid JSON (${err.finishReason ?? "unknown"})`);
+    }
+    throw err;
+  }
 }
 
 const US_STATES = new Set(
@@ -154,7 +286,7 @@ export async function applyEnrichment(c: EnrichmentCandidate, e: Enrichment): Pr
   ];
   const canUpdateStatus = c.status === "filed" || c.status === "unknown";
   await updateCaseFields(c.id, {
-    summary: e.summary.trim() || null,
+    summary: capWords(e.summary) || null,
     whoQualifies: e.who_qualifies?.trim() || null,
     categories: e.categories.map((s) => s.trim().toLowerCase()).filter(Boolean).slice(0, 6),
     states,
@@ -205,34 +337,45 @@ export async function applyEnrichment(c: EnrichmentCandidate, e: Enrichment): Pr
   return linked;
 }
 
-export function hasAnthropicCredentials(): boolean {
-  return Boolean(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN);
-}
-
 export interface EnrichOptions {
   limit: number;
   force?: boolean;
   ids?: string[];
+  /** Read court filings (complaint or other PDFs). Off means docket entries only. */
   includePdf?: boolean;
   /** Delete cases the model says are not class actions. */
   prune?: boolean;
+  model?: string;
   log?: (msg: string) => void;
+}
+
+function isAuthError(err: unknown): boolean {
+  const e = (err as { lastError?: unknown })?.lastError ?? err;
+  const status = (e as { statusCode?: number })?.statusCode;
+  return status === 401 || status === 403;
 }
 
 export async function enrichPending(opts: EnrichOptions) {
   const log = opts.log ?? console.log;
-  const stats = { enriched: 0, skipped: 0, failed: 0, pruned: 0 };
-  if (!hasAnthropicCredentials()) {
-    log("ANTHROPIC_API_KEY is not set; skipping enrichment.");
+  const stats = { enriched: 0, analyzed: 0, skipped: 0, failed: 0, pruned: 0 };
+  const model = opts.model ?? enrichModel();
+  const missing = missingCredentials(model) ?? missingCredentials(complaintModel());
+  if (missing) {
+    log(`${missing}; skipping enrichment.`);
     return stats;
   }
-  const client = new Anthropic();
   const candidates = await listCasesForEnrichment({ limit: opts.limit, force: opts.force, ids: opts.ids });
-  log(`Enriching ${candidates.length} case(s) with ${ENRICH_MODEL}`);
+  log(`Enriching ${candidates.length} case(s) with ${model}`);
 
   for (const c of candidates) {
     try {
-      const e = await extractEnrichment(client, c, { includePdf: opts.includePdf ?? true });
+      let filings: Filing[] = [];
+      let complaint: ComplaintText | null = null;
+      if (opts.includePdf ?? true) {
+        const docs = c.complaintUrl ? [] : await refreshFromCourtListener(c, log);
+        ({ filings, complaint } = await gatherFilings(c, docs));
+      }
+      const e = await extractEnrichment(c, filings, { model });
       if (!e.is_class_action && opts.prune) {
         await deleteCase(c.id);
         stats.pruned++;
@@ -241,22 +384,45 @@ export async function enrichPending(opts: EnrichOptions) {
       }
       const brands = await applyEnrichment(c, e);
       stats.enriched++;
+      const read = complaint ? "complaint" : filings.length ? `${filings.length} filing(s)` : "docket only";
       log(
-        `  ${c.id} ${e.is_class_action ? "" : "[not class action?] "}${e.status_guess} | brands: ${brands.join(", ") || "-"} | ${c.caseName}`,
+        `  ${c.id} ${e.is_class_action ? "" : "[not class action?] "}${e.status_guess} | read: ${read} | brands: ${brands.join(", ") || "-"} | ${c.caseName}`,
       );
+      if (complaint) {
+        try {
+          const analysis = await analyzeComplaintText(
+            { ...c, complaintUrl: complaint.url },
+            complaint.text,
+            { model: complaintModel() },
+          );
+          await saveComplaintAnalysis({
+            caseId: c.id,
+            complaintUrl: complaint.url,
+            status: "parsed",
+            pageCount: complaint.pageCount,
+            textChars: complaint.textChars,
+            truncated: complaint.truncated,
+            model: complaintModel(),
+            analysis,
+          });
+          stats.analyzed++;
+        } catch (err) {
+          if (!(err instanceof ComplaintAnalysisSkipped)) throw err;
+          log(`  ${c.id} complaint analysis skipped: ${err.message}`);
+        }
+      }
     } catch (err) {
       if (err instanceof EnrichmentSkipped) {
         stats.skipped++;
         log(`  ${c.id} skipped: ${err.message}`);
-      } else if (err instanceof Anthropic.AuthenticationError) {
-        log("Anthropic authentication failed; stopping.");
+      } else if (isAuthError(err)) {
         stats.failed++;
+        log(`AI provider rejected the request (authentication or model access); stopping. ${err instanceof Error ? err.message : ""}`);
         break;
-      } else if (err instanceof Anthropic.APIError) {
-        stats.failed++;
-        log(`  ${c.id} API error ${err.status}: ${err.message}`);
       } else {
-        throw err;
+        // Transient (network, rate limit, gateway error): leave unenriched so the next run retries.
+        stats.failed++;
+        log(`  ${c.id} failed: ${err instanceof Error ? err.message : String(err)}`);
       }
     }
   }

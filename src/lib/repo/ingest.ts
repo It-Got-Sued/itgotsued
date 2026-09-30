@@ -87,6 +87,7 @@ const FIELD_COLUMNS = {
   summary: "summary",
   whoQualifies: "who_qualifies",
   claimUrl: "claim_url",
+  complaintUrl: "complaint_url",
   claimDeadline: "claim_deadline",
   settlementAmount: "settlement_amount",
   states: "states",
@@ -103,6 +104,7 @@ export async function updateCaseFields(
     summary: string | null;
     whoQualifies: string | null;
     claimUrl: string | null;
+    complaintUrl: string | null;
     claimDeadline: string | null;
     settlementAmount: string | null;
     states: string[];

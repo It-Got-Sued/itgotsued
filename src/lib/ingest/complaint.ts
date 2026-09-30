@@ -1,7 +1,7 @@
 // Complaint parser + AI summarizer: download a case's complaint PDF, extract its text,
-// and have an LLM (via the Vercel AI Gateway) return a validated ComplaintAnalysis:
+// and have an LLM (DeepSeek or the Vercel AI Gateway, see ./ai) return a validated ComplaintAnalysis:
 // plain-English summary, allegations, class definition and an estimated payout range.
-import { createGateway, generateText, NoObjectGeneratedError, Output } from "ai";
+import { generateText, NoObjectGeneratedError, Output } from "ai";
 import { extractText, getDocumentProxy } from "unpdf";
 import { z } from "zod";
 import {
@@ -10,8 +10,9 @@ import {
   type ComplaintCandidate,
 } from "@/lib/repo/complaints";
 import type { ComplaintAnalysis } from "@/lib/types";
+import { DEFAULT_MODEL, languageModel, missingCredentials } from "./ai";
 
-export const DEFAULT_COMPLAINT_MODEL = "anthropic/claude-sonnet-5.5";
+export const DEFAULT_COMPLAINT_MODEL = DEFAULT_MODEL;
 
 export function complaintModel(): string {
   return process.env.COMPLAINT_SUMMARY_MODEL?.trim() || DEFAULT_COMPLAINT_MODEL;
@@ -263,15 +264,6 @@ function mergeRanges(ranges: [number, number][]): [number, number][] {
 // ---------------------------------------------------------------------------------------
 // LLM
 
-/** Gateway API key. AI_GATEWAY_API_KEY is the standard name; AI_GATEWAY_URL is accepted
- *  when it holds a key rather than a URL (how .env.local currently stores it). */
-export function gatewayApiKey(): string | undefined {
-  const key = process.env.AI_GATEWAY_API_KEY?.trim();
-  if (key) return key;
-  const legacy = process.env.AI_GATEWAY_URL?.trim();
-  return legacy && !/^https?:\/\//i.test(legacy) ? legacy : undefined;
-}
-
 export class ComplaintAnalysisSkipped extends Error {}
 
 function describeCase(c: ComplaintCandidate): string {
@@ -287,13 +279,12 @@ function describeCase(c: ComplaintCandidate): string {
 export async function analyzeComplaintText(
   c: ComplaintCandidate,
   complaintText: string,
-  opts: { model?: string; apiKey?: string } = {},
+  opts: { model?: string } = {},
 ): Promise<ComplaintAnalysis> {
-  const gateway = createGateway({ apiKey: opts.apiKey ?? gatewayApiKey() });
   let output: ComplaintAnalysis;
   try {
     const result = await generateText({
-      model: gateway(opts.model ?? complaintModel()),
+      model: languageModel(opts.model ?? complaintModel()),
       system: SYSTEM_PROMPT,
       prompt: `${describeCase(c)}\n\n<complaint>\n${complaintText}\n</complaint>`,
       output: Output.object({ schema: ComplaintAnalysisSchema }),
@@ -349,12 +340,12 @@ function isAuthError(err: unknown): boolean {
 export async function parsePendingComplaints(opts: ParseComplaintsOptions) {
   const log = opts.log ?? console.log;
   const stats = { parsed: 0, unparseable: 0, skipped: 0, failed: 0 };
-  const apiKey = gatewayApiKey();
-  if (!apiKey && !process.env.VERCEL_OIDC_TOKEN) {
-    log("AI_GATEWAY_API_KEY is not set; skipping complaint parsing.");
+  const model = opts.model ?? complaintModel();
+  const missing = missingCredentials(model);
+  if (missing) {
+    log(`${missing}; skipping complaint parsing.`);
     return stats;
   }
-  const model = opts.model ?? complaintModel();
   const candidates = await listComplaintsToParse({ limit: opts.limit, ids: opts.ids, force: opts.force });
   log(`Parsing ${candidates.length} complaint(s) with ${model}`);
 
@@ -362,7 +353,7 @@ export async function parsePendingComplaints(opts: ParseComplaintsOptions) {
     try {
       const pdf = await extractPdfText(await downloadPdf(c.complaintUrl));
       const { text, truncated } = selectExcerpts(pdf.text);
-      const analysis = await analyzeComplaintText(c, text, { model, apiKey });
+      const analysis = await analyzeComplaintText(c, text, { model });
       await saveComplaintAnalysis({
         caseId: c.id,
         complaintUrl: c.complaintUrl,
@@ -396,7 +387,7 @@ export async function parsePendingComplaints(opts: ParseComplaintsOptions) {
         log(`  ${c.id} skipped: ${err.message}`);
       } else if (isAuthError(err)) {
         stats.failed++;
-        log(`AI Gateway rejected the request (authentication or model access); stopping. ${err instanceof Error ? err.message : ""}`);
+        log(`AI provider rejected the request (authentication or model access); stopping. ${err instanceof Error ? err.message : ""}`);
         break;
       } else {
         // Transient (network, rate limit, gateway error): leave unrecorded so the next run retries.
