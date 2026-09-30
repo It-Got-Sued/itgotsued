@@ -29,7 +29,7 @@ enrichPending({
 })
   .then((s) =>
     console.log(
-      `Done: ${s.enriched} enriched, ${s.analyzed} complaints analyzed, ${s.skipped} skipped, ${s.failed} failed, ${s.pruned} pruned.`,
+      `Done: ${s.enriched} enriched, ${s.analyzed} complaints analyzed, ${s.skipped} skipped, ${s.failed} failed, ${s.pruned} pruned, ${s.noCompany} removed with no company defendant.`,
     ),
   )
   .catch((err) => {

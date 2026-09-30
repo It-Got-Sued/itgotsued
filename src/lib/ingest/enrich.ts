@@ -77,6 +77,11 @@ export const EnrichmentSchema = z.object({
   defendants: z.array(
     z.object({
       company: z.string().describe("Defendant legal name as filed, e.g. 'The Coca-Cola Company'."),
+      kind: z
+        .enum(["company", "person", "government", "other"])
+        .describe(
+          "company: a business (corporation, LLC, partnership, bank, insurer). person: an individual human, including executives, officers, employees and private individuals. government: a government body, agency or official. other: anything else (a trust, estate, union, nonprofit, unnamed Doe).",
+        ),
       brands: z
         .array(
           z.object({
@@ -88,7 +93,7 @@ export const EnrichmentSchema = z.object({
             products: z.array(z.string()).describe("Specific products at issue, e.g. 'Dasani 16.9 oz bottled water'."),
           }),
         )
-        .describe("Consumer brands at issue. Empty if the defendant has no consumer-facing brand."),
+        .describe("Consumer brands at issue. Empty unless kind is company and it has a consumer-facing brand."),
     }),
   ),
   categories: z
@@ -107,7 +112,7 @@ const SYSTEM_PROMPT = `You analyze U.S. federal court dockets for It Got Sued, a
 
 From the docket metadata, docket entries and any attached court filings (the complaint, or other filings such as settlement motions and orders), extract the requested fields. Write summaries for ordinary consumers at an 8th-grade reading level. Describe allegations as allegations ("says", "claims"), never as established facts. Do not give legal advice.
 
-Only name brands and products that the filings actually identify. If the filings do not make something clear, return null, an empty list, or "unknown" rather than guessing. For status_guess: "filed" if the case is active without class certification, "certified" if a class was certified, "settlement_pending" if a settlement was proposed or preliminarily approved, "claims_closed" if a settlement's claim period ended, "dismissed" if dismissed or voluntarily dismissed, otherwise "unknown".`;
+Only name brands and products that the filings actually identify. A brand is always a business. Never list a person (executives, officers, employees, private individuals) or a government body as a brand; mark them with kind "person" or "government" and give them no brands. If the filings do not make something clear, return null, an empty list, or "unknown" rather than guessing. For status_guess: "filed" if the case is active without class certification, "certified" if a class was certified, "settlement_pending" if a settlement was proposed or preliminarily approved, "claims_closed" if a settlement's claim period ended, "dismissed" if dismissed or voluntarily dismissed, otherwise "unknown".`;
 
 function describeCase(c: EnrichmentCandidate, filings: Filing[]): string {
   const entries = c.docketEntries
@@ -259,7 +264,7 @@ export async function extractEnrichment(
       system: SYSTEM_PROMPT,
       prompt: describeCase(c, filings),
       output: Output.object({ schema: EnrichmentSchema }),
-      maxOutputTokens: 8_000,
+      maxOutputTokens: 32_000,
       maxRetries: 2,
       abortSignal: AbortSignal.timeout(180_000),
     });
@@ -280,6 +285,11 @@ const US_STATES = new Set(
 );
 
 /** Persist an enrichment: case fields, then brand links (reusing dictionary brands by name/alias). */
+/** Defendants that are businesses. Only these are linked as brands; a case with none is removed. */
+export function companyDefendants(e: Enrichment): Enrichment["defendants"] {
+  return e.defendants.filter((d) => d.kind === "company" && d.company.trim());
+}
+
 export async function applyEnrichment(c: EnrichmentCandidate, e: Enrichment): Promise<string[]> {
   const states = [
     ...new Set(e.states.map((s) => s.trim().toUpperCase()).filter((s) => US_STATES.has(s))),
@@ -297,7 +307,7 @@ export async function applyEnrichment(c: EnrichmentCandidate, e: Enrichment): Pr
   });
 
   const linked: string[] = [];
-  for (const d of e.defendants) {
+  for (const d of companyDefendants(e)) {
     // Link the defendant company too, so owners of any of its brands (Ring for a suit
     // against Amazon.com, Inc.) find the case by climbing to the parent.
     const company = d.company.trim();
@@ -357,7 +367,7 @@ function isAuthError(err: unknown): boolean {
 
 export async function enrichPending(opts: EnrichOptions) {
   const log = opts.log ?? console.log;
-  const stats = { enriched: 0, analyzed: 0, skipped: 0, failed: 0, pruned: 0 };
+  const stats = { enriched: 0, analyzed: 0, skipped: 0, failed: 0, pruned: 0, noCompany: 0 };
   const model = opts.model ?? enrichModel();
   const missing = missingCredentials(model) ?? missingCredentials(complaintModel());
   if (missing) {
@@ -380,6 +390,13 @@ export async function enrichPending(opts: EnrichOptions) {
         await deleteCase(c.id);
         stats.pruned++;
         log(`  ${c.id} pruned (not a class action): ${c.caseName}`);
+        continue;
+      }
+      // The site lists only suits against a company or brand, not person v. person or government cases.
+      if (!companyDefendants(e).length) {
+        await deleteCase(c.id);
+        stats.noCompany++;
+        log(`  ${c.id} removed (no company or brand defendant): ${c.caseName}`);
         continue;
       }
       const brands = await applyEnrichment(c, e);

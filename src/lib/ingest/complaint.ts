@@ -288,7 +288,7 @@ export async function analyzeComplaintText(
       system: SYSTEM_PROMPT,
       prompt: `${describeCase(c)}\n\n<complaint>\n${complaintText}\n</complaint>`,
       output: Output.object({ schema: ComplaintAnalysisSchema }),
-      maxOutputTokens: 8_000,
+      maxOutputTokens: 32_000,
       maxRetries: 2,
       abortSignal: AbortSignal.timeout(180_000),
     });
