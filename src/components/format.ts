@@ -23,6 +23,18 @@ export function daysUntil(iso: string | null | undefined): number | null {
   return Math.round((target - today) / 86_400_000);
 }
 
+// Words kept in capitals when a category key is shown to people.
+const ACRONYMS = new Set(["ada", "tcpa", "bipa", "fcra", "fdcpa", "vppa", "ccpa", "ucl", "erisa", "flsa", "hipaa", "gps", "ai", "atm", "sms"]);
+
+/** "ada_website_accessibility" -> "ADA Website Accessibility". Categories are stored as snake_case keys. */
+export function formatCategory(key: string): string {
+  return key
+    .split(/[_\s]+/)
+    .filter(Boolean)
+    .map((w) => (ACRONYMS.has(w.toLowerCase()) ? w.toUpperCase() : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()))
+    .join(" ");
+}
+
 export const US_STATES: [string, string][] = [
   ["AL", "Alabama"], ["AK", "Alaska"], ["AZ", "Arizona"], ["AR", "Arkansas"],
   ["CA", "California"], ["CO", "Colorado"], ["CT", "Connecticut"], ["DE", "Delaware"],

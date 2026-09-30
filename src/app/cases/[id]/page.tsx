@@ -8,7 +8,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { SampleBadge, SampleBanner } from "@/components/SampleBadge";
 import { STATUS_INFO, TONE_ACCENT, TONE_CLASSES, TONE_DOT } from "@/components/status";
 import { Reveal } from "@/components/motion";
-import { formatDate, safeUrl } from "@/components/format";
+import { formatCategory, formatDate, safeUrl } from "@/components/format";
 import { Disclaimer } from "@/components/Disclaimer";
 import { ApplyPanel } from "@/components/case/ApplyPanel";
 import { ComplaintAnalysis } from "@/components/case/ComplaintAnalysis";
@@ -101,7 +101,7 @@ export default async function CasePage({ params }: Props) {
     ["Filed", formatDate(c.dateFiled)],
     ["Nature of suit", c.natureOfSuit],
     ["States", c.states.length ? c.states.join(", ") : null],
-    ["Categories", c.categories.length ? c.categories.join(", ") : null],
+    ["Categories", c.categories.length ? c.categories.map(formatCategory).join(", ") : null],
   ];
 
   return (
