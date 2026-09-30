@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-export const SITE_URL = "https://itgotsued.com";
+export const SITE_URL = "https://www.itgotsued.com";
 export const SITE_NAME = "It Got Sued";
 
 // Served by src/app/opengraph-image.tsx. Listed explicitly because a page that sets its

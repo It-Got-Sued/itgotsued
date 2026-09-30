@@ -5,7 +5,7 @@ import { requireUser } from "@/lib/auth/session";
 import { hasActiveSubscription } from "@/lib/repo/users";
 import { usedToday } from "@/lib/repo/usage";
 import { proPriceLabel } from "@/lib/stripe";
-import { FREE_DAILY_SCANS } from "@/lib/tiers";
+import { FREE_DAILY_SCANS, tierOf } from "@/lib/tiers";
 import Link from "next/link";
 import { pageMetadata } from "@/lib/seo";
 
@@ -36,7 +36,8 @@ export default async function AccountPage({
   const sp = await searchParams;
   const notice = NOTICES[sp.checkout ?? (sp.reset ? "reset" : sp.welcome ? "welcome" : "")];
   const active = hasActiveSubscription(user);
-  const [price, scansUsed] = await Promise.all([proPriceLabel(), active ? 0 : usedToday(user.id, "scan")]);
+  const pro = tierOf(user) === "pro";
+  const [price, scansUsed] = await Promise.all([proPriceLabel(), pro ? 0 : usedToday(user.id, "scan")]);
 
   return (
     <div className="mx-auto max-w-xl space-y-6">
@@ -48,8 +49,10 @@ export default async function AccountPage({
       {notice && <Alert tone={notice.tone}>{notice.text}</Alert>}
 
       <section className="card space-y-3 p-6">
-        <h2 className="text-xl font-bold">Plan: {active ? "Pro" : "Free"}</h2>
-        {active ? (
+        <h2 className="text-xl font-bold">Plan: {pro ? "Pro" : "Free"}</h2>
+        {pro && !active ? (
+          <p className="text-muted">Pro is included with your admin account.</p>
+        ) : active ? (
           <>
             <p>
               <strong>It Got Sued Pro — {price}.</strong>{" "}

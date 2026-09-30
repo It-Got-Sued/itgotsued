@@ -1,11 +1,11 @@
 import { query, queryOne } from "@/lib/db";
-import { tierOf } from "@/lib/tiers";
 
 export type User = {
   id: string;
   email: string;
   displayName: string | null;
   isAdmin: boolean;
+  tierType: "free" | "pro";
   stripeCustomerId: string | null;
   stripeSubscriptionId: string | null;
   subscriptionStatus: string;
@@ -25,6 +25,7 @@ export function toUser(r: Row): User {
     email: r.email as string,
     displayName: (r.display_name as string) ?? null,
     isAdmin: r.is_admin as boolean,
+    tierType: r.tier_type as "free" | "pro",
     stripeCustomerId: (r.stripe_customer_id as string) ?? null,
     stripeSubscriptionId: (r.stripe_subscription_id as string) ?? null,
     subscriptionStatus: r.subscription_status as string,
@@ -35,9 +36,9 @@ export function toUser(r: Row): User {
   };
 }
 
-/** Stripe statuses that unlock paid features. */
+/** Whether the user pays for Pro through Stripe. Admins get Pro without a subscription. */
 export function hasActiveSubscription(user: User | null): boolean {
-  return tierOf(user) === "pro";
+  return user?.subscriptionStatus === "active" || user?.subscriptionStatus === "trialing";
 }
 
 export function normalizeEmail(email: string): string {

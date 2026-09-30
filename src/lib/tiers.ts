@@ -12,7 +12,8 @@ export const FREE_DAILY_SCANS = 3;
 
 export function tierOf(user: User | null): Tier {
   if (!user) return "anonymous";
-  return user.subscriptionStatus === "active" || user.subscriptionStatus === "trialing" ? "pro" : "free";
+  // users.tier_type is generated in Postgres: pro for admins and active or trialing subscriptions.
+  return user.tierType;
 }
 
 const RANK: Record<Tier, number> = { anonymous: 0, free: 1, pro: 2 };
