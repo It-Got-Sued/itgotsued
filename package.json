@@ -16,10 +16,12 @@
     "infer-status": "tsx scripts/infer-status.ts",
     "simulate:parent": "tsx scripts/simulate-parent-search.ts",
     "parse-complaints": "tsx scripts/parse-complaints.ts",
-    "refresh": "npm run ingest -- --since-days 3 --all-nos --limit 5000 --no-details && npm run ingest -- --settlement-since-days 7 --limit 5000 --no-details && npm run link-brands",
+    "refresh": "npm run ingest -- --since-days 3 --all-nos --limit 5000 --no-details && npm run ingest -- --settlement-since-days 7 --limit 5000 --no-details && npm run link-brands && npm run notify-claims",
+    "notify-claims": "tsx scripts/notify-claims.ts",
     "stripe:setup": "tsx scripts/stripe-setup.ts"
   },
   "dependencies": {
+    "@ai-sdk/deepseek": "^3.0.57",
     "@anthropic-ai/sdk": "^0.129.0",
     "@node-rs/argon2": "^2.2.1",
     "@vercel/analytics": "^2.0.1",

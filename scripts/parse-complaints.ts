@@ -1,6 +1,6 @@
 // Read each case's complaint PDF and store an AI summary, allegations, class definition and
 // estimated payout in complaint_analyses. Each complaint is read once; scanned/empty PDFs
-// are recorded as unparseable. Skips (exit 0) when the AI Gateway key is unset.
+// are recorded as unparseable. Skips (exit 0) when the model provider key is unset.
 //
 //   npm run parse-complaints -- --limit 10
 //
@@ -8,7 +8,8 @@
 //   --limit N       max complaints (default 20)
 //   --case-id ID    parse specific case id(s), comma-separated (re-parses them)
 //   --force         re-parse complaints that already have an analysis
-//   --model ID      gateway model id (default $COMPLAINT_SUMMARY_MODEL or anthropic/claude-sonnet-5.5)
+//   --model ID      model id, e.g. deepseek/deepseek-v4-pro or anthropic/claude-sonnet-5.5 via the gateway
+//                   (default $COMPLAINT_SUMMARY_MODEL or deepseek/deepseek-v4-pro)
 import { parseArgs } from "./_env";
 import { parsePendingComplaints } from "@/lib/ingest/complaint";
 import { closePool } from "@/lib/db";

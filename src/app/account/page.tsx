@@ -72,8 +72,8 @@ export default async function AccountPage({
             ) : (
               <p className="text-muted">
                 {Math.max(0, FREE_DAILY_SCANS - scansUsed)} of {FREE_DAILY_SCANS} free scans left today.
-                Pro unlocks who qualifies, claim links, court filings, photo and bank scans, My Items,
-                and brand alerts. <Link href="/pricing" className="link">Compare plans</Link>
+                Pro unlocks who qualifies, claim links, court filings, photo and bank scans, and My Items.{" "}
+                <Link href="/pricing" className="link">Compare plans</Link>
               </p>
             )}
             <div className="flex flex-wrap gap-2">
