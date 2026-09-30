@@ -3,7 +3,7 @@
 // the Plaid Item (always), and returns { detections: BrandDetection[] } only.
 // No amounts, dates, or account data leave this handler; nothing is stored or logged.
 
-import { subscriberOnlyResponse } from "@/lib/auth/session";
+import { tierDeniedResponse } from "@/lib/auth/session";
 import { z } from "zod";
 import {
   BankScanError,
@@ -36,7 +36,7 @@ const Body = z
 const limiter = createRateLimiter(5, 10 * 60_000); // 5 scans per IP per 10 min
 
 export async function POST(request: Request) {
-  const denied = await subscriberOnlyResponse();
+  const denied = await tierDeniedResponse("pro");
   if (denied) return denied;
   const config = getPlaidConfig();
   if (!config) return errorJson(503, NOT_CONFIGURED_MESSAGE);

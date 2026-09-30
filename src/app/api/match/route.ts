@@ -1,4 +1,5 @@
-import { subscriberOnlyResponse } from "@/lib/auth/session";
+import { getTier, tierDeniedResponse } from "@/lib/auth/session";
+import { shieldSummary } from "@/lib/paywall";
 import { z } from "zod";
 import { badRequest, errorResponse } from "@/lib/brands/http";
 import { matchDetections, MAX_DETECTIONS } from "@/lib/brands/match";
@@ -22,7 +23,7 @@ const Body = z.object({
 // POST MatchRequest { detections, activeOnly? } -> { matches: RankedBrandMatch[] }
 // (BrandMatch plus relation/via/method/confidence).
 export async function POST(request: Request) {
-  const denied = await subscriberOnlyResponse();
+  const denied = await tierDeniedResponse("free");
   if (denied) return denied;
   let json: unknown;
   try {
@@ -34,7 +35,11 @@ export async function POST(request: Request) {
   if (!parsed.success) return badRequest("Invalid request.", z.flattenError(parsed.error));
 
   try {
-    const matches = await matchDetections(parsed.data.detections, { activeOnly: parsed.data.activeOnly });
+    const tier = await getTier();
+    const matches = (await matchDetections(parsed.data.detections, { activeOnly: parsed.data.activeOnly })).map((m) => ({
+      ...m,
+      cases: m.cases.map((c) => shieldSummary(c, tier)),
+    }));
     return Response.json({ matches }, { headers: { "Cache-Control": "no-store" } });
   } catch (err) {
     return errorResponse(err);

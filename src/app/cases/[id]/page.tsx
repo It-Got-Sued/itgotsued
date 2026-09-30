@@ -17,7 +17,8 @@ import { DocketTable } from "@/components/case/DocketTable";
 import { FollowBrand } from "@/components/case/FollowBrand";
 import { SITE_NAME, SITE_URL, jsonLd, pageMetadata } from "@/lib/seo";
 import type { CaseDetail } from "@/lib/types";
-import { isSubscriber } from "@/lib/auth/session";
+import { getTier } from "@/lib/auth/session";
+import { shieldDetail } from "@/lib/paywall";
 import { Paywall } from "@/components/Paywall";
 
 type Props = { params: Promise<{ id: string }> };
@@ -80,10 +81,14 @@ function caseStructuredData(c: CaseDetail, description: string) {
 
 export default async function CasePage({ params }: Props) {
   const { id } = await params;
-  const c = await loadCase(id);
-  if (!c) notFound();
+  const found = await loadCase(id);
+  if (!found) notFound();
 
-  const paid = await isSubscriber();
+  // Strip what this tier can't see before rendering, so nothing leaks into the page payload.
+  const tier = await getTier();
+  const c = shieldDetail(found, tier);
+  const pro = tier === "pro";
+  const casePath = `/cases/${encodeURIComponent(c.id)}`;
   const status = STATUS_INFO[c.status] ?? STATUS_INFO.unknown;
   const sourceUrl = safeUrl(c.sourceUrl);
   const facts: [string, React.ReactNode][] = [
@@ -143,53 +148,60 @@ export default async function CasePage({ params }: Props) {
             </section>
           </Reveal>
 
-          {paid ? (
-            <>
-          <Reveal as="section" className="card p-6 sm:p-8">
-            <h2 id="summary-heading" className="text-2xl font-bold">Summary</h2>
-            <p className="mt-3 whitespace-pre-line leading-relaxed">
-              {c.summary ?? "A plain-language summary isn't available yet."}
-            </p>
-            <h2 id="qualify-heading" className="mt-8 text-2xl font-bold">Who qualifies</h2>
-            <p className="mt-3 whitespace-pre-line leading-relaxed">
-              {c.whoQualifies ?? "The class definition hasn't been summarized yet. Check the complaint below."}
-            </p>
-            {c.brands.length > 0 && (
-              <>
-                <h2 id="brands-heading" className="mt-8 text-2xl font-bold">Brands named</h2>
-                <ul className="mt-3 flex flex-wrap gap-2">
-                  {c.brands.map((b) => (
-                    <li key={b}>
-                      <Link
-                        href={`/cases?brand=${encodeURIComponent(normalizeBrandKey(b))}`}
-                        className="chip min-h-11 px-4 hover:-translate-y-0.5 hover:border-primary/50 hover:text-primary"
-                      >
-                        {b}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
-          </Reveal>
-
-          {c.complaintAnalysis?.analysis && (
-            <Reveal>
-              <ComplaintAnalysis record={c.complaintAnalysis} />
+          {tier === "anonymous" ? (
+            <Paywall min="free" feature="Summary and claim deadline" next={casePath} />
+          ) : (
+            <Reveal as="section" className="card p-6 sm:p-8">
+              <h2 id="summary-heading" className="text-2xl font-bold">Summary</h2>
+              <p className="mt-3 whitespace-pre-line leading-relaxed">
+                {c.summary ?? "A plain-language summary isn't available yet."}
+              </p>
+              <h2 id="qualify-heading" className="mt-8 text-2xl font-bold">Who qualifies</h2>
+              {pro ? (
+                <p className="mt-3 whitespace-pre-line leading-relaxed">
+                  {c.whoQualifies ?? "The class definition hasn't been summarized yet. Check the complaint below."}
+                </p>
+              ) : (
+                <p className="mt-3 text-muted">
+                  Part of It Got Sued Pro. <Link href="/pricing" className="link">See plans</Link>
+                </p>
+              )}
+              {c.brands.length > 0 && (
+                <>
+                  <h2 id="brands-heading" className="mt-8 text-2xl font-bold">Brands named</h2>
+                  <ul className="mt-3 flex flex-wrap gap-2">
+                    {c.brands.map((b) => (
+                      <li key={b}>
+                        <Link
+                          href={`/cases?brand=${encodeURIComponent(normalizeBrandKey(b))}`}
+                          className="chip min-h-11 px-4 hover:-translate-y-0.5 hover:border-primary/50 hover:text-primary"
+                        >
+                          {b}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
             </Reveal>
           )}
 
-          <Reveal>
-            <ComplaintViewer url={safeUrl(c.complaintUrl)} />
-          </Reveal>
-
-          <Reveal>
-            <DocketTable entries={c.docketEntries} />
-          </Reveal>
-
+          {pro ? (
+            <>
+              {c.complaintAnalysis?.analysis && (
+                <Reveal>
+                  <ComplaintAnalysis record={c.complaintAnalysis} />
+                </Reveal>
+              )}
+              <Reveal>
+                <ComplaintViewer url={safeUrl(c.complaintUrl)} />
+              </Reveal>
+              <Reveal>
+                <DocketTable entries={c.docketEntries} />
+              </Reveal>
             </>
           ) : (
-            <Paywall feature="Summary, who qualifies, and court filings" next={`/cases/${encodeURIComponent(c.id)}`} />
+            tier === "free" && <Paywall feature="Who qualifies, claim links, and court filings" next={casePath} />
           )}
 
           <section aria-labelledby="source-heading" className="space-y-1 text-sm">
@@ -211,13 +223,11 @@ export default async function CasePage({ params }: Props) {
         </div>
 
         <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
-          {paid && (
-            <>
-              <ApplyPanel c={c} />
-              <div className="card p-6">
-                <FollowBrand brands={c.brands} />
-              </div>
-            </>
+          {tier !== "anonymous" && <ApplyPanel c={c} />}
+          {pro && (
+            <div className="card p-6">
+              <FollowBrand brands={c.brands} />
+            </div>
           )}
         </aside>
       </div>

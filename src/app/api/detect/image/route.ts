@@ -1,4 +1,4 @@
-import { subscriberOnlyResponse } from "@/lib/auth/session";
+import { tierDeniedResponse } from "@/lib/auth/session";
 import { hasAnthropicKey } from "@/lib/brands/claude";
 import { detectBrandsInImage, MAX_IMAGE_BYTES } from "@/lib/brands/detect-image";
 import { badRequest, errorResponse } from "@/lib/brands/http";
@@ -10,7 +10,7 @@ export const maxDuration = 120;
 // POST multipart/form-data with field "image" -> { detections: BrandDetection[] }.
 // The photo is held in memory for this request only: never written to disk or logged.
 export async function POST(request: Request) {
-  const denied = await subscriberOnlyResponse();
+  const denied = await tierDeniedResponse("pro");
   if (denied) return denied;
   const limit = rateLimit("detect-image", clientIp(request), 10, 60_000);
   if (!limit.ok) return tooManyRequests(limit);

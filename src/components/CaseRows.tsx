@@ -6,7 +6,7 @@ import { daysUntil, formatDate } from "./format";
 import { IconArrowRight, IconClock } from "./icons";
 
 /** Dense list view of cases: one row per lawsuit, whole row clickable. */
-/** `locked`: subscriber-only fields were removed; show that instead of an empty deadline. */
+/** `locked`: claim deadlines were removed for signed-out visitors; say so instead of showing "—". */
 export function CaseRows({
   cases,
   headingLevel = 2,
@@ -85,7 +85,7 @@ export function CaseRows({
                     {days !== null && days >= 0 && ` · ${days === 0 ? "today" : `${days}d`}`}
                   </span>
                 ) : locked && c.status === "claims_open" ? (
-                  <span className="text-xs font-semibold text-muted">Subscribers only</span>
+                  <span className="text-xs font-semibold text-muted">Free account</span>
                 ) : (
                   <span className="hidden text-muted md:inline">—</span>
                 )}

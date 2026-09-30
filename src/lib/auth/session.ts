@@ -3,7 +3,8 @@ import { cache } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { query, queryOne } from "@/lib/db";
-import { getUserById, hasActiveSubscription, type User } from "@/lib/repo/users";
+import { getUserById, type User } from "@/lib/repo/users";
+import { atLeast, tierOf, type Tier } from "@/lib/tiers";
 
 // Opaque random session tokens in an httpOnly cookie. The database stores only their sha256,
 // so sessions can be revoked server-side (log out, password reset) and a leaked table cannot be replayed.
@@ -58,9 +59,9 @@ export const getCurrentUser = cache(async (): Promise<User | null> => {
   return s ? getUserById(s.user_id) : null;
 });
 
-/** True when the current visitor has an active subscription. */
-export async function isSubscriber(): Promise<boolean> {
-  return hasActiveSubscription(await getCurrentUser());
+/** The current visitor's account tier: anonymous, free, or pro. */
+export async function getTier(): Promise<Tier> {
+  return tierOf(await getCurrentUser());
 }
 
 export async function requireUser(next = "/account"): Promise<User> {
@@ -69,12 +70,14 @@ export async function requireUser(next = "/account"): Promise<User> {
   return user;
 }
 
-/** For Route Handlers: a 401/402 response when the caller is not a paying subscriber, else null. */
-export async function subscriberOnlyResponse(): Promise<Response | null> {
-  const user = await getCurrentUser();
-  if (!user) return Response.json({ error: "Sign in to use this feature." }, { status: 401 });
-  if (!hasActiveSubscription(user)) {
-    return Response.json({ error: "This feature needs an It Got Sued subscription." }, { status: 402 });
+/** For Route Handlers: a 401/402 response when the caller's tier is below `min`, else null. */
+export async function tierDeniedResponse(min: Exclude<Tier, "anonymous">): Promise<Response | null> {
+  const tier = await getTier();
+  if (tier === "anonymous") {
+    return Response.json({ error: "Create a free account or sign in to use this feature." }, { status: 401 });
+  }
+  if (!atLeast(tier, min)) {
+    return Response.json({ error: "This feature is part of It Got Sued Pro. Upgrade at /pricing." }, { status: 402 });
   }
   return null;
 }
