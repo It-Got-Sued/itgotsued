@@ -1,3 +1,4 @@
+import { subscriberOnlyResponse } from "@/lib/auth/session";
 import { z } from "zod";
 import { badRequest, errorResponse } from "@/lib/brands/http";
 import { matchDetections, MAX_DETECTIONS } from "@/lib/brands/match";
@@ -21,6 +22,8 @@ const Body = z.object({
 // POST MatchRequest { detections, activeOnly? } -> { matches: RankedBrandMatch[] }
 // (BrandMatch plus relation/via/method/confidence).
 export async function POST(request: Request) {
+  const denied = await subscriberOnlyResponse();
+  if (denied) return denied;
   let json: unknown;
   try {
     json = await request.json();

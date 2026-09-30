@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { MyItems } from "@/components/myitems/MyItems";
 import { pageMetadata } from "@/lib/seo";
+import { isSubscriber } from "@/lib/auth/session";
+import { Paywall } from "@/components/Paywall";
 
 export const metadata: Metadata = pageMetadata({
   title: "My Items",
@@ -11,7 +13,8 @@ export const metadata: Metadata = pageMetadata({
   noindex: true,
 });
 
-export default function MyItemsPage() {
+export default async function MyItemsPage() {
+  const paid = await isSubscriber();
   return (
     <div className="space-y-8">
       <header className="space-y-3">
@@ -24,7 +27,7 @@ export default function MyItemsPage() {
           ones that are filed, certified, awaiting settlement approval, or open for claims.
         </p>
       </header>
-      <MyItems />
+      {paid ? <MyItems /> : <Paywall feature="Check your items against every lawsuit" next="/my-items" />}
     </div>
   );
 }

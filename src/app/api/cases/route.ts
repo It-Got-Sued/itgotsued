@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { isSubscriber } from "@/lib/auth/session";
+import { shieldSummary } from "@/lib/paywall";
 import { searchCases } from "@/lib/repo/cases";
 import { CASE_STATUSES, type CaseSearchParams, type CaseSearchResult } from "@/lib/types";
 
@@ -41,6 +43,7 @@ export async function GET(request: Request) {
   }
   try {
     const result: CaseSearchResult = await searchCases(parsed.data as CaseSearchParams);
+    if (!(await isSubscriber())) result.cases = result.cases.map(shieldSummary);
     return Response.json(result, { headers: { "Cache-Control": "no-store" } });
   } catch (err) {
     console.error("[cases] search failed:", err instanceof Error ? err.message : err);

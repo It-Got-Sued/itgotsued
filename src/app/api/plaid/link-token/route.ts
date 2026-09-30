@@ -1,6 +1,7 @@
 // POST /api/plaid/link-token  body: { platform?: "web" | "ios" | "android" }
 // Returns { linkToken, expiration }. Anonymous: client_user_id is a fresh UUID.
 
+import { subscriberOnlyResponse } from "@/lib/auth/session";
 import { z } from "zod";
 import {
   NOT_CONFIGURED_MESSAGE,
@@ -25,6 +26,8 @@ const Body = z
 const limiter = createRateLimiter(10, 10 * 60_000); // 10 per IP per 10 min
 
 export async function POST(request: Request) {
+  const denied = await subscriberOnlyResponse();
+  if (denied) return denied;
   const config = getPlaidConfig();
   if (!config) return errorJson(503, NOT_CONFIGURED_MESSAGE);
 

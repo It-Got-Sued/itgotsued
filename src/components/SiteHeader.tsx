@@ -12,6 +12,7 @@ const NAV = [
   { href: "/my-items", label: "My Items" },
   { href: "/privacy", label: "Privacy" },
   { href: "/about", label: "About" },
+  { href: "/account", label: "Account" },
 ];
 
 function isActive(pathname: string, href: string) {

@@ -1,3 +1,4 @@
+import { subscriberOnlyResponse } from "@/lib/auth/session";
 import { z } from "zod";
 import { detectBrandsInText, MAX_DESCRIPTION_CHARS } from "@/lib/brands/detect-text";
 import { badRequest, errorResponse } from "@/lib/brands/http";
@@ -13,6 +14,8 @@ const Body = z.object({
 // POST { description } -> { detections: BrandDetection[] }. Falls back to a dictionary
 // lookup when ANTHROPIC_API_KEY is not configured.
 export async function POST(request: Request) {
+  const denied = await subscriberOnlyResponse();
+  if (denied) return denied;
   const limit = rateLimit("detect-text", clientIp(request), 30, 60_000);
   if (!limit.ok) return tooManyRequests(limit);
 

@@ -6,7 +6,16 @@ import { daysUntil, formatDate } from "./format";
 import { IconArrowRight, IconClock } from "./icons";
 
 /** Dense list view of cases: one row per lawsuit, whole row clickable. */
-export function CaseRows({ cases, headingLevel = 2 }: { cases: CaseSummary[]; headingLevel?: 2 | 3 }) {
+/** `locked`: subscriber-only fields were removed; show that instead of an empty deadline. */
+export function CaseRows({
+  cases,
+  headingLevel = 2,
+  locked = false,
+}: {
+  cases: CaseSummary[];
+  headingLevel?: 2 | 3;
+  locked?: boolean;
+}) {
   const H = `h${headingLevel}` as "h2" | "h3";
   return (
     <div className="card overflow-hidden p-0">
@@ -75,6 +84,8 @@ export function CaseRows({ cases, headingLevel = 2 }: { cases: CaseSummary[]; he
                     {formatDate(c.claimDeadline)}
                     {days !== null && days >= 0 && ` · ${days === 0 ? "today" : `${days}d`}`}
                   </span>
+                ) : locked && c.status === "claims_open" ? (
+                  <span className="text-xs font-semibold text-muted">Subscribers only</span>
                 ) : (
                   <span className="hidden text-muted md:inline">—</span>
                 )}

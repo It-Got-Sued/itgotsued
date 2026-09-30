@@ -17,6 +17,8 @@ import { DocketTable } from "@/components/case/DocketTable";
 import { FollowBrand } from "@/components/case/FollowBrand";
 import { SITE_NAME, SITE_URL, jsonLd, pageMetadata } from "@/lib/seo";
 import type { CaseDetail } from "@/lib/types";
+import { isSubscriber } from "@/lib/auth/session";
+import { Paywall } from "@/components/Paywall";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -44,7 +46,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return pageMetadata({
     // Short case names have room for the search phrase people actually type.
     title: c.caseName.length <= 26 ? `${c.caseName} Class Action Lawsuit` : c.caseName,
-    description: c.summary ?? fallback,
+    description: fallback,
     path: `/cases/${encodeURIComponent(c.id)}`,
     type: "article",
     noindex: c.isSample,
@@ -81,6 +83,7 @@ export default async function CasePage({ params }: Props) {
   const c = await loadCase(id);
   if (!c) notFound();
 
+  const paid = await isSubscriber();
   const status = STATUS_INFO[c.status] ?? STATUS_INFO.unknown;
   const sourceUrl = safeUrl(c.sourceUrl);
   const facts: [string, React.ReactNode][] = [
@@ -97,7 +100,7 @@ export default async function CasePage({ params }: Props) {
       {!c.isSample && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={jsonLd(caseStructuredData(c, c.summary ?? status.explanation))}
+          dangerouslySetInnerHTML={jsonLd(caseStructuredData(c, status.explanation))}
         />
       )}
       {c.isSample && <SampleBanner />}
@@ -140,6 +143,8 @@ export default async function CasePage({ params }: Props) {
             </section>
           </Reveal>
 
+          {paid ? (
+            <>
           <Reveal as="section" className="card p-6 sm:p-8">
             <h2 id="summary-heading" className="text-2xl font-bold">Summary</h2>
             <p className="mt-3 whitespace-pre-line leading-relaxed">
@@ -182,6 +187,11 @@ export default async function CasePage({ params }: Props) {
             <DocketTable entries={c.docketEntries} />
           </Reveal>
 
+            </>
+          ) : (
+            <Paywall feature="Summary, who qualifies, and court filings" next={`/cases/${encodeURIComponent(c.id)}`} />
+          )}
+
           <section aria-labelledby="source-heading" className="space-y-1 text-sm">
             <h2 id="source-heading" className="font-semibold">Source</h2>
             <p>
@@ -201,10 +211,14 @@ export default async function CasePage({ params }: Props) {
         </div>
 
         <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
-          <ApplyPanel c={c} />
-          <div className="card p-6">
-            <FollowBrand brands={c.brands} />
-          </div>
+          {paid && (
+            <>
+              <ApplyPanel c={c} />
+              <div className="card p-6">
+                <FollowBrand brands={c.brands} />
+              </div>
+            </>
+          )}
         </aside>
       </div>
     </article>

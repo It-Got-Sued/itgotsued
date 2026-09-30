@@ -10,6 +10,9 @@ import { Reveal } from "@/components/motion";
 import { CASE_STATUSES } from "@/lib/types";
 import Link from "next/link";
 import { pageMetadata } from "@/lib/seo";
+import { isSubscriber } from "@/lib/auth/session";
+import { shieldSummary } from "@/lib/paywall";
+import { Paywall } from "@/components/Paywall";
 
 const PAGE_SIZE = 20;
 
@@ -86,6 +89,9 @@ export default async function CasesPage({ searchParams }: { searchParams: Promis
     }
   })();
 
+  const paid = await isSubscriber();
+  if (result && !paid) result.cases = result.cases.map(shieldSummary);
+
   const pageCount = result ? Math.ceil(result.total / PAGE_SIZE) : 0;
   const hrefFor = (p: number) => {
     const qs = new URLSearchParams();
@@ -150,13 +156,14 @@ export default async function CasesPage({ searchParams }: { searchParams: Promis
             {pageCount > 1 && ` · page ${Math.min(page, pageCount)} of ${pageCount}`}
             {lookedUpLive && " · just fetched from federal court records"}
           </p>
-          <CaseRows cases={result.cases} />
+          <CaseRows cases={result.cases} locked={!paid} />
         </>
       )}
       {result && result.cases.length === 0 && page > 1 && pageCount > 0 && (
         <p className="text-sm"><a className="link" href={hrefFor(1)}>Back to page 1</a></p>
       )}
       <Pagination page={page} pageCount={pageCount} hrefFor={hrefFor} />
+      {!paid && <Paywall feature="See summaries, claim deadlines, and where to file" next={hrefFor(page)} />}
     </div>
   );
 }

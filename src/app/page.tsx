@@ -11,6 +11,9 @@ import { Alert } from "@/components/Alert";
 import { HeroVisual } from "@/components/HeroVisual";
 import { IconBank, IconCamera, IconList, IconPencil, IconShield } from "@/components/icons";
 import { SITE_NAME, SITE_URL, jsonLd, pageMetadata } from "@/lib/seo";
+import { isSubscriber } from "@/lib/auth/session";
+import { shieldSummary } from "@/lib/paywall";
+import { Paywall } from "@/components/Paywall";
 
 export const metadata: Metadata = pageMetadata({
   title: "It Got Sued: Class Action Lawsuits Over Stuff You Own",
@@ -91,6 +94,8 @@ async function loadHome(): Promise<{
 
 export default async function Home() {
   const { open, totalCases, totalBrands } = await loadHome();
+  const paid = await isSubscriber();
+  if (open && !paid) open.cases = open.cases.map(shieldSummary);
 
   return (
     <div className="space-y-20 sm:space-y-28">
@@ -127,7 +132,7 @@ export default async function Home() {
 
       {/* ---------- Scanner ---------- */}
       <div id="scan" className="scroll-mt-24">
-        <Scanner />
+        {paid ? <Scanner /> : <Paywall feature="Check your stuff by photo, text, or bank scan" next="/#scan" />}
       </div>
 
       {/* ---------- Ways to check ---------- */}
